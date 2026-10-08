@@ -1,8 +1,8 @@
 {
   "name": "monitor-codex-nocobase",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "description": "Monitor local de chats vinculados ao NocoBase, com Kanban e demonstração fictícia.",
   "type": "module",
   "engines": {
@@ -22,6 +22,7 @@
     ".gitignore",
     "AGENTS.md",
     "README.md",
+    "LICENSE",
     "docs/CHANGELOG.md",
     "docs/PRIVACIDADE.md",
     "config.example.json",

@@ -15,6 +15,7 @@ monitor-codex-nocobase/
 ├── docs/         Guias de navegadores, privacidade e histórico
 ├── Iniciar-Monitor.cmd
 ├── Diagnosticar-Monitor.cmd
+├── LICENSE
 ├── config.example.json
 └── package.json
 ```
@@ -180,7 +181,7 @@ Os testes usam dados fictícios e serviços isolados. O teste opcional `npm run 
 
 `scripts/export.mjs` cria uma pasta nova em `release/` com somente os arquivos públicos listados em `package.json`. Configurações locais, dados, logs, backups e histórico Git da pasta de trabalho ficam de fora. Use essa exportação para iniciar ou atualizar o **repositório dedicado ao monitor**; nunca publique o repositório de trabalho que contém dados pessoais.
 
-A licença permanece **a definir pelo proprietário** (`UNLICENSED`); ainda não foi concedida uma licença aberta de redistribuição. Consulte [docs/PRIVACIDADE.md](docs/PRIVACIDADE.md), [docs/CHANGELOG.md](docs/CHANGELOG.md) e [AGENTS.md](AGENTS.md).
+Distribuído sob a [licença MIT](LICENSE). Você pode usar, modificar e redistribuir o monitor, inclusive comercialmente, preservando o aviso de autoria e a licença. Copyright (c) 2026 magalisantosdesign-stack. Consulte [docs/PRIVACIDADE.md](docs/PRIVACIDADE.md), [docs/CHANGELOG.md](docs/CHANGELOG.md) e [AGENTS.md](AGENTS.md).
 O coletor também confere o estado do Codex desktop a cada 3 segundos para reconhecer respostas recebidas dentro do mesmo turno. A ponte local é descoberta automaticamente pelos hooks de chats vinculados; precisa de uma versão compatível do aplicativo desktop no Windows. Uma atualização do Codex pode exigir ajuste dessa integração. Sem ponte disponível, a coleta continua pelos hooks, e perguntas assíncronas podem permanecer pendentes até uma nova entrada. Não há leitura de arquivos de transcrição nem uso do texto das conversas.
 
 A ponte é opcional e depende da versão do Codex desktop. A consulta geral de status exige o contexto de outro chat vinculado; quando há apenas um contexto disponível, esse chat usa os hooks para execução e a consulta de metadados para perguntas. Contextos de chats desvinculados não são usados. Essa ponte local ainda não é uma API estável de integração pública.

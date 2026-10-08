@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 0.6.5 — 2026-10-08
+
+- Adoção da licença MIT por escolha da proprietária, com aviso de autoria magalisantosdesign-stack.
+- LICENSE incluído no manifesto de exportação e documentação de uso e redistribuição atualizada.
+- Código e funcionamento do monitor preservados.
+
 ## 0.6.4 — 2026-10-08
 
 - Separação de código, testes, scripts, extensões e documentação em pastas.
