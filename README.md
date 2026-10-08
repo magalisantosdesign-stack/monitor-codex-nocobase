@@ -1,8 +1,25 @@
 # Monitor Codex para NocoBase
 
-Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processando**, **Aguardando aprovação**, **Aguardando resposta**, **Respondido**, **Interrompido** e **Sem sinal**. Oferece Stand-by, atualização automática e suporte aos temas claro e escuro. O estado do chat é independente da situação da tarefa ou projeto.
+Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processando**, **Aguardando aprovação**, **Aguardando resposta**, **Respondido**, **Interrompido** **Sem sinal** e **Estado não confirmado**. Oferece Stand-by, atualização automática e suporte aos temas claro e escuro. O estado do chat é independente da situação da tarefa ou projeto.
 
 O pacote começa **em demonstração, com seis cartões fictícios**. Nesse modo não lê cadastros, chama o coletor ou salva vínculos. Dados pessoais, conversas e configurações de conta não acompanham a distribuição. Este é um projeto independente, sem vínculo oficial com Codex ou NocoBase.
+
+## Organização do projeto
+
+```text
+monitor-codex-nocobase/
+├── src/          Código do coletor e painel JSX
+├── tests/        Testes com dados fictícios
+├── scripts/      Instalação, inicialização, diagnóstico e exportação
+├── extensions/  Extensões Chromium e Firefox
+├── docs/         Guias de navegadores, privacidade e histórico
+├── Iniciar-Monitor.cmd
+├── Diagnosticar-Monitor.cmd
+├── config.example.json
+└── package.json
+```
+
+Execute os comandos deste guia na raiz do projeto. `config.local.json` e `.local/` continuam nessa raiz e não são publicados.
 
 ## Escolha como iniciar
 
@@ -10,7 +27,7 @@ A extensão é **opcional**. Os dois caminhos usam o mesmo coletor e oferecem a 
 
 | | Sem extensão | Com extensão |
 | --- | --- | --- |
-| Iniciar o monitor | Abrir `Iniciar-Monitor.cmd` ou executar `node Iniciar-Monitor.mjs` | Clicar em **Conectar monitor** no NocoBase |
+| Iniciar o monitor | Abrir `Iniciar-Monitor.cmd` ou executar `node scripts/Iniciar-Monitor.mjs` | Clicar em **Conectar monitor** no NocoBase |
 | Preparação adicional | Nenhuma instalação de ponte ou extensão | Instalar a ponte local e carregar a extensão no navegador |
 | Encerrar o Node do monitor | **Desconectar monitor**, no painel | **Desconectar monitor**, no painel |
 | Após reiniciar o Windows | Abrir o iniciador novamente | Clicar em **Conectar monitor** novamente |
@@ -25,7 +42,7 @@ A extensão é **opcional**. Os dois caminhos usam o mesmo coletor e oferecem a 
 - Codex local com os eventos de hooks necessários disponíveis e confiados pelo usuário.
 - Windows e PowerShell para os iniciadores `.cmd` e a ponte do navegador. Outros sistemas não foram validados nesta versão.
 
-O botão via extensão foi verificado no Chrome e no Edge no Windows. Brave, Opera/GX e Firefox têm pacotes e testes isolados, mas ainda precisam de validação no navegador real. A instalação permanente no Firefox exige assinatura Mozilla, ainda não fornecida. Safari e navegadores móveis não têm ponte neste pacote. Detalhes em [NAVEGADORES.md](NAVEGADORES.md).
+O botão via extensão foi verificado no Chrome e no Edge no Windows. Brave, Opera/GX e Firefox têm pacotes e testes isolados, mas ainda precisam de validação no navegador real. A instalação permanente no Firefox exige assinatura Mozilla, ainda não fornecida. Safari e navegadores móveis não têm ponte neste pacote. Detalhes em [docs/NAVEGADORES.md](docs/NAVEGADORES.md).
 
 ## Preparação comum aos dois caminhos
 
@@ -39,11 +56,11 @@ Copy-Item config.example.json config.local.json
 
 A porta padrão do coletor é **13011**. Configure `origins` com os endereços locais exatos do NocoBase, sem caminho ou barra final. O servidor atende somente em loopback; não use `*`. Dados privados ficam em `.local/data`.
 
-Se necessário, configure `codexHome` para a pasta Codex da conta. Sem essa opção, usa `CODEX_HOME` ou `.codex` na pasta da conta. `CODEX_MONITOR_PORT`, `CODEX_MONITOR_DATA`, `CODEX_MONITOR_SETTINGS` e `CODEX_MONITOR_CONFIG` permitem configurações específicas. Consulte `config.mjs` antes de alterar essas opções.
+Se necessário, configure `codexHome` para a pasta Codex da conta. Sem essa opção, usa `CODEX_HOME` ou `.codex` na pasta da conta. `CODEX_MONITOR_PORT`, `CODEX_MONITOR_DATA`, `CODEX_MONITOR_SETTINGS` e `CODEX_MONITOR_CONFIG` permitem configurações específicas. Consulte `src/config.mjs` antes de alterar essas opções.
 
 ### 2. Preparar o painel
 
-Crie uma página com um bloco JavaScript no NocoBase e cole `panel.jsx`. Mantenha `demo: true` para experimentar os seis cartões fictícios, sem acesso à rede ou aos cadastros.
+Crie uma página com um bloco JavaScript no NocoBase e cole `src/panel.jsx`. Mantenha `demo: true` para experimentar os seis cartões fictícios, sem acesso à rede ou aos cadastros.
 
 Para uso real, ajuste `MONITOR_CONFIG` no início do bloco:
 
@@ -62,13 +79,13 @@ O painel depende das bibliotecas do NocoBase; não é uma página HTML independe
 Na pasta do monitor, execute primeiro a prévia:
 
 ```powershell
-node Install-Hooks.mjs
+node scripts/Install-Hooks.mjs
 ```
 
 Revise o destino e o comando. Para gravar:
 
 ```powershell
-node Install-Hooks.mjs --apply
+node scripts/Install-Hooks.mjs --apply
 ```
 
 O instalador preserva outros handlers e guarda backups em `.local/backups`. Revise os hooks no Codex e conceda confiança (no CLI, `/hooks`). O instalador não concede confiança nem aprova ferramentas. Pode ser necessário recarregar o Codex para ler a configuração.
@@ -79,7 +96,7 @@ Evite manter handlers de duas cópias do monitor para o mesmo uso. Se mover a pa
 
 ## Caminho A — sem extensão
 
-1. Abra `Iniciar-Monitor.cmd` na pasta instalada. Alternativamente, execute `node Iniciar-Monitor.mjs` nessa pasta.
+1. Abra `Iniciar-Monitor.cmd` na pasta instalada. Alternativamente, execute `node scripts/Iniciar-Monitor.mjs` nessa pasta.
 2. Abra o painel do NocoBase e confira **Coletor conectado**. Se ele já estava aberto ou havia sido desconectado, clique em **Atualizar** para retomar a consulta.
 3. Vincule seus chats e acompanhe os estados. As mudanças passam a aparecer automaticamente.
 4. Ao terminar, clique em **Desconectar monitor** para encerrar o Node do coletor.
@@ -93,13 +110,13 @@ Esse caminho não exige instalar a ponte, registrar um protocolo, instalar exten
 Depois da preparação comum, execute no PowerShell, dentro da pasta permanente do monitor:
 
 ```powershell
-.\Instalar-Ponte-Navegadores.ps1 -Browsers Chrome,Edge -Preview
-.\Instalar-Ponte-Navegadores.ps1 -Browsers Chrome,Edge
+.\scripts/Instalar-Ponte-Navegadores.ps1 -Browsers Chrome,Edge -Preview
+.\scripts/Instalar-Ponte-Navegadores.ps1 -Browsers Chrome,Edge
 ```
 
 Substitua a seleção pelos navegadores usados: `Chrome`, `Edge`, `Brave`, `Opera` ou `Firefox`. Sem `-Browsers`, o instalador prepara todos esses hosts. A prévia não grava nada; a instalação registra a ponte somente na conta atual, sem administrador. Ela salva o caminho absoluto do Node e as opções privadas do iniciador em `.local/`.
 
-Carregue a extensão explicitamente, conforme [NAVEGADORES.md](NAVEGADORES.md). Instalar a ponte **não instala a extensão**. Chrome/Edge/Brave/Opera usam `chrome-extension`; Firefox usa `firefox-extension`.
+Carregue a extensão explicitamente, conforme [docs/NAVEGADORES.md](docs/NAVEGADORES.md). Instalar a ponte **não instala a extensão**. Chrome/Edge/Brave/Opera usam `extensions/chromium`; Firefox usa `extensions/firefox`.
 
 1. Com a extensão carregada, atualize a página do NocoBase.
 2. Clique em **Conectar monitor**. O script local inicia em segundo plano e termina após iniciar o Node. A confirmação é **Coletor conectado** no painel.
@@ -125,7 +142,7 @@ Stand-by fica salvo após reiniciar. Uma nova execução principal observada dev
 1. Abra `Iniciar-Monitor.cmd` diretamente e clique em **Atualizar** no painel. Isso testa o coletor sem depender da extensão.
 2. Abra `Diagnosticar-Monitor.cmd`. Ele verifica a instância e a última tentativa, sem listar chats.
 3. Confira a mesma porta em `config.local.json` e `MONITOR_CONFIG.endpoint`, além da origem correta do NocoBase.
-4. No caminho com extensão, confira o host instalado, a extensão carregada e a origem permitida em [NAVEGADORES.md](NAVEGADORES.md).
+4. No caminho com extensão, confira o host instalado, a extensão carregada e a origem permitida em [docs/NAVEGADORES.md](docs/NAVEGADORES.md).
 5. Logs privados ficam em `.local/windows-launcher.log`, `.local/startup-result.json` ou na pasta de dados (`service-error.log`). Não publique esses arquivos.
 
 O iniciador detecta configuração inválida, porta ocupada, trava antiga e falha ao criar o processo. Outra instalação na mesma porta não é considerada a instância correta. A tentativa pelo botão termina com orientação após 45 segundos se o coletor não confirmar.
@@ -133,10 +150,10 @@ O iniciador detecta configuração inválida, porta ocupada, trava antiga e falh
 Instalações antigas que ativaram início com o Windows podem remover somente essa entrada com:
 
 ```powershell
-.\Remover-Integracao-Windows.ps1 -OnlyAutoStart
+.\scripts/Remover-Integracao-Windows.ps1 -OnlyAutoStart
 ```
 
-O protocolo externo `codex-monitor://reconnect` permanece uma alternativa de compatibilidade, registrada por `Instalar-Reconexao.ps1`; ele não é usado pelo botão atual e não é necessário no caminho sem extensão.
+O protocolo externo `codex-monitor://reconnect` permanece uma alternativa de compatibilidade, registrada por `scripts/Instalar-Reconexao.ps1`; ele não é usado pelo botão atual e não é necessário no caminho sem extensão.
 
 ## Limites e validação
 
@@ -155,15 +172,15 @@ Referências: [Hooks do Codex](https://learn.chatgpt.com/docs/hooks) e [revisão
 
 ```powershell
 npm test
-node check-distribution.mjs
-node export.mjs
+node scripts/check-distribution.mjs
+node scripts/export.mjs
 ```
 
 Os testes usam dados fictícios e serviços isolados. O teste opcional `npm run test:edge` usa o Edge instalado, um perfil exclusivo e um host temporário. Não usa o perfil pessoal; quando não há Edge, informa SKIP.
 
-`export.mjs` cria uma pasta nova em `release/` com somente os arquivos públicos listados em `package.json`. Configurações locais, dados, logs, backups e histórico Git da pasta de trabalho ficam de fora. Use essa exportação para iniciar ou atualizar o **repositório dedicado ao monitor**; nunca publique o repositório de trabalho que contém dados pessoais.
+`scripts/export.mjs` cria uma pasta nova em `release/` com somente os arquivos públicos listados em `package.json`. Configurações locais, dados, logs, backups e histórico Git da pasta de trabalho ficam de fora. Use essa exportação para iniciar ou atualizar o **repositório dedicado ao monitor**; nunca publique o repositório de trabalho que contém dados pessoais.
 
-A licença permanece **a definir pelo proprietário** (`UNLICENSED`); ainda não foi concedida uma licença aberta de redistribuição. Consulte [PRIVACIDADE.md](PRIVACIDADE.md), [CHANGELOG.md](CHANGELOG.md) e [AGENTS.md](AGENTS.md).
+A licença permanece **a definir pelo proprietário** (`UNLICENSED`); ainda não foi concedida uma licença aberta de redistribuição. Consulte [docs/PRIVACIDADE.md](docs/PRIVACIDADE.md), [docs/CHANGELOG.md](docs/CHANGELOG.md) e [AGENTS.md](AGENTS.md).
 O coletor também confere o estado do Codex desktop a cada 3 segundos para reconhecer respostas recebidas dentro do mesmo turno. A ponte local é descoberta automaticamente pelos hooks de chats vinculados; precisa de uma versão compatível do aplicativo desktop no Windows. Uma atualização do Codex pode exigir ajuste dessa integração. Sem ponte disponível, a coleta continua pelos hooks, e perguntas assíncronas podem permanecer pendentes até uma nova entrada. Não há leitura de arquivos de transcrição nem uso do texto das conversas.
 
 A ponte é opcional e depende da versão do Codex desktop. A consulta geral de status exige o contexto de outro chat vinculado; quando há apenas um contexto disponível, esse chat usa os hooks para execução e a consulta de metadados para perguntas. Contextos de chats desvinculados não são usados. Essa ponte local ainda não é uma API estável de integração pública.
@@ -182,3 +199,7 @@ O monitor relê os chats automaticamente enquanto conectado. Cada confirmação 
 **Tentar novamente**, no cartão, prioriza uma nova leitura. Não reinicia o coletor, não envia mensagens, não concede aprovações e não exige terminal ou reinstalação de hooks. Depois de reconectar ou reiniciar o coletor, os estados salvos passam por nova verificação. A leitura também funciona com apenas um chat vinculado; conexões indisponíveis usam outros contextos locais reais quando disponíveis. Um novo turno principal observado pela fonte recupera um início cujo hook não chegou, respeitando proteção contra eventos antigos.
 
 A confirmação de captura é mantida em memória e não é exportada. Enquanto um estado estiver sem confirmação, ele não pode ser colocado em Stand-by; marcadores já existentes são preservados. Uma ponte incompatível ou uma instalação sem captura ativa continua sendo uma limitação de instalação, sinalizada no painel. A recuperação não contorna a confiança exigida pelo Codex nem promete estados que a fonte não forneceu.
+
+## Atualizar uma instalação anterior a 0.6.4
+
+Desconecte o coletor antes de atualizar os arquivos. Preserve `config.local.json` e `.local/` na raiz, reinstale os hooks com `npm run hooks:install` e revise a confiança solicitada pelo Codex. Se usa extensão, execute novamente `scripts/Instalar-Ponte-Navegadores.ps1` e carregue `extensions/chromium` ou `extensions/firefox` no navegador. O bloco do NocoBase usa agora `src/panel.jsx`. A atualização não instala nada automaticamente.
