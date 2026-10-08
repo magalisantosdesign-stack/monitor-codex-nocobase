@@ -1,0 +1,15 @@
+.local/
+data/
+config.local.json
+*.local.json
+*.log
+*.pid
+hooks-backup*
+.env
+.env.*
+!.env.example
+node_modules/
+release/
+*.zip
+.DS_Store
+Thumbs.db

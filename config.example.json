@@ -1,0 +1,5 @@
+{
+  "port": 13011,
+  "origins": ["http://localhost:13000", "http://127.0.0.1:13000"],
+  "dataDir": ".local/data"
+}

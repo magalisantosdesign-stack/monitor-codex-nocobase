@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Monitor Codex — Conexão local",
+  "version": "0.6.0",
+  "description": "Inicia o script local do monitor somente ao clicar em Conectar no NocoBase.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhZGM1yXbI9/Po0UzRzIrbNnJQBYeC9JO1k9AqTwwqInRorOXRgM/NFr3sOwMq0DJj9fKA9d3jaO8S0u+xWpLZquwIgJAwnsFwwO63+UXRPX5wcObT4gPli8qEC55ltKDg+OL5axDVWRVzTTOe2Mdq4hJcj2AiE8bE4BzHjJnvbVvARXuFsXTTh7Ur/9jnmwpdXY7krarKu/CIv1OR8KWyqVBlw5gCDsEYXUP+IBop4o/3bHg5rcsxo6y54sRa8Uj3TVoZkvZ9ers7MPadZ++57glGfTCLll7q2rai7aHCnQg7jIxAtJoKC0I+NIXpqdQwxF80AH3zyFDXw7fevkanQIDAQAB",
+  "permissions": [
+    "nativeMessaging"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://127.0.0.1:13000/*",
+        "http://localhost:13000/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
