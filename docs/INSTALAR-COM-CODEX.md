@@ -201,7 +201,9 @@ respondeu. Na página de uso, verifique a leitura real e a mudança automática
 do horário de última leitura, sem clique, após pelo menos um minuto. Ausência
 de janela ou erro da fonte não significa consumo zero. Confira também
 Redefinições disponíveis: usar somente o contador retornado; dado ausente
-é Não informado, e zero explícito deve aparecer como zero. Não consumir resets.
+é Não informado, e zero explícito deve aparecer como zero. A lista deve mostrar
+cada redefinição completa com validade quando fornecida; não inventar histórico
+nem deduzir o total pela lista parcial. Não consumir resets.
 
 ### 6. Escolher conexão com ou sem extensão
 

@@ -18,7 +18,7 @@ const bridge=net.createServer(socket=>{
   let value;
   if(request.params.tool==='get_usage_limits'){
    usageCalls++;assert.deepEqual(request.params.arguments,{});assert.equal(request.params.threadId,id);assert.equal(request.params.turnId,turn);
-   value={accountId:'SECRET_ACCOUNT',rateLimits:{limitId:'codex',planType:'pro',primary:{usedPercent:39,windowDurationMins:10080,resetsAt:2000000000},secondary:null},rateLimitResetCredits:{availableCount:2,credits:[{id:'SECRET_RESET'}]}};
+   value={accountId:'SECRET_ACCOUNT',rateLimits:{limitId:'codex',planType:'pro',primary:{usedPercent:39,windowDurationMins:10080,resetsAt:2000000000},secondary:null},rateLimitResetCredits:{availableCount:2,credits:[{id:'SECRET_RESET',resetType:'codexRateLimits',status:'available',expiresAt:2000000000,title:'SECRET_TITLE'}]}};
   }else{
    assert.equal(request.params.tool,'read_thread');value={thread:{id,hostId:'local',status:{type:'idle'}},turns:[{id:turn,status:'completed',items:[]}]};
   }
@@ -38,7 +38,7 @@ try{
  assert.equal((await fetch(url+'/usage',{headers:{Origin:'http://evil.example'}})).status,403);assert.equal(usageCalls,0);
  const responses=await Promise.all([fetch(url+'/usage',{headers}),fetch(url+'/usage',{headers})]);
  const first=await responses[0].json(),second=await responses[1].json();
- assert.equal(first.confirmed,true);assert.equal(first.availableResets,2);assert.equal(first.scope,'account');assert.equal(first.limits[0].windows[0].remainingPercent,61);assert.deepEqual(first,second);assert.equal(usageCalls,1);assert.ok(!JSON.stringify(first).includes('SECRET'));
+ assert.equal(first.confirmed,true);assert.equal(first.availableResets,2);assert.deepEqual(first.resetDetails,[{type:'full',expiresAt:2000000000}]);assert.equal(first.scope,'account');assert.equal(first.limits[0].windows[0].remainingPercent,61);assert.deepEqual(first,second);assert.equal(usageCalls,1);assert.ok(!JSON.stringify(first).includes('SECRET'));
  await fetch(url+'/usage',{headers});assert.equal(usageCalls,1);
  const states=await (await fetch(url+'/states',{headers})).json();assert.equal(states.service,'codex-monitor');assert.equal(states.instanceId,first.instanceId);
  const shutdown=await fetch(url+'/shutdown',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({instanceId:first.instanceId})});assert.equal(shutdown.status,200);

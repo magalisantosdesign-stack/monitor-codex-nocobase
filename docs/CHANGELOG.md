@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## 0.7.2 — 2026-10-09
+
+- Redefinições disponíveis listadas individualmente com validade, em caixinha ao lado da próxima renovação e empilhada em telas menores.
+- Total continua baseado em availableCount, incluindo listas parciais; IDs e conteúdo bruto dos créditos não são expostos. Somente consulta da lista, sem histórico nem botão para utilizar redefinições.
+
 ## 0.7.1 — 2026-10-09
 
 - Contador Redefinições disponíveis na página Uso do Codex, com atualização automática e leitura exclusiva de availableCount.
