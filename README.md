@@ -4,6 +4,14 @@ Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processan
 
 O pacote começa **em demonstração, com seis cartões fictícios**. Nesse modo não lê cadastros, chama o coletor ou salva vínculos. Dados pessoais, conversas e configurações de conta não acompanham a distribuição. Este é um projeto independente, sem vínculo oficial com Codex ou NocoBase.
 
+## Instalar com ajuda do Codex
+
+Extraia o pacote em uma pasta permanente, abra essa pasta no **Codex local** e envie:
+
+> Leia docs/INSTALAR-COM-CODEX.md e execute a instalação do monitor neste computador. Verifique os requisitos, instale o que faltar, faça as configurações e os testes e me oriente nas etapas que exigirem minha ação. Preserve meu ambiente e não configure início automático com o Windows.
+
+O [roteiro de instalação](docs/INSTALAR-COM-CODEX.md) orienta o agente a aproveitar os componentes existentes, preparar o coletor e o painel, configurar a conexão com ou sem extensão e verificar eventos reais. Login, confiança dos hooks e carregamento da extensão podem exigir sua ação. Não é necessário entender os comandos abaixo para usar esse caminho.
+
 ## Organização do projeto
 
 ```text

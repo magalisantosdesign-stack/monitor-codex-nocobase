@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 0.6.6 — 2026-10-09
+
+- Guia INSTALAR-COM-CODEX.md para instalação assistida: descoberta de requisitos, instalação de componentes ausentes, configuração do coletor/painel, intervenções humanas e testes reais.
+- Entrada curta no README e roteiro incluído no manifesto de exportação.
+- Regras do agente distinguem preparação da distribuição de instalação explicitamente autorizada. Código e funcionamento do monitor preservados.
+
 ## 0.6.5 — 2026-10-08
 
 - Adoção da licença MIT por escolha da proprietária, com aviso de autoria magalisantosdesign-stack.
