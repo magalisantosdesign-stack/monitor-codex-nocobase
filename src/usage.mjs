@@ -2,7 +2,7 @@ import net from 'node:net';
 import {randomUUID} from 'node:crypto';
 import {validBridge} from './runtime.mjs';
 
-// Account-level limits only. Never read auth files, transcripts or reset credits.
+// Account limits and available reset count only; never read auth or redeem resets.
 export function selectUsage(result,at=Date.now()){
  if(result?.success!==true||!Array.isArray(result.contentItems))return null;
  for(const item of result.contentItems){
@@ -21,7 +21,9 @@ export function selectUsage(result,at=Date.now()){
    }
    if(windows.length)limits.push({label:typeof bucket.limitName==='string'?bucket.limitName.slice(0,100):typeof bucket.limitId==='string'?bucket.limitId.slice(0,100):'Codex',plan:typeof bucket.planType==='string'?bucket.planType.slice(0,30):null,windows});
   }
-  if(limits.length)return {at,scope:'account',limits};
+  const count=value?.rateLimitResetCredits?.availableCount;
+  const availableResets=Number.isSafeInteger(count)&&count>=0?count:null;
+  if(limits.length||availableResets!==null)return {at,scope:'account',limits,availableResets};
  }
  return null;
 }
@@ -50,7 +52,7 @@ export function queryUsage(bridge,{timeoutMs=1500,connect=net.createConnection,n
 
 export function createUsageReader({bridges,query=queryUsage,now=Date.now,maxAgeMs=60000}){
  let pending=null,lastAttempt=0,snapshot=null,confirmed=false;
- function view(){return {service:'codex-monitor',confirmed,at:snapshot?.at||null,scope:'account',limits:snapshot?.limits||[]};}
+ function view(){return {service:'codex-monitor',confirmed,at:snapshot?.at||null,scope:'account',limits:snapshot?.limits||[],availableResets:snapshot?.availableResets??null};}
  return async()=>{
   if(pending){await pending;return view();}
   if(lastAttempt&&now()-lastAttempt<maxAgeMs)return view();

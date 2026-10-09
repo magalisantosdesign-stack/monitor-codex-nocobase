@@ -16,7 +16,7 @@ function UsageOverview({online,demo=false,refreshKey=0}){
    if(inFlight||(!online&&!demo))return;inFlight=true;setBusy(true);
    try{
     let value;
-    if(demo)value={service:'codex-monitor',confirmed:true,at:Date.now(),scope:'account',limits:[{label:'Codex',plan:'Demonstração',windows:[{key:'primary',usedPercent:38,remainingPercent:62,windowDurationMins:10080,resetsAt:Math.floor(Date.now()/1000)+2*86400+23*3600}]}]};
+    if(demo)value={service:'codex-monitor',confirmed:true,at:Date.now(),scope:'account',availableResets:2,limits:[{label:'Codex',plan:'Demonstração',windows:[{key:'primary',usedPercent:38,remainingPercent:62,windowDurationMins:10080,resetsAt:Math.floor(Date.now()/1000)+2*86400+23*3600}]}]};
     else{
      const response=await window.fetch(endpoint+'/usage',{signal:window.AbortSignal.any([controller.signal,window.AbortSignal.timeout(7000)])});
      if(!response.ok)throw new Error('unavailable');value=await response.json();
@@ -34,10 +34,11 @@ function UsageOverview({online,demo=false,refreshKey=0}){
  const windows=(data?.limits||[]).flatMap(limit=>limit.windows.map(window=>({...window,label:limit.label,plan:limit.plan})));
  return <Space direction="vertical" size="large" style={{width:'100%'}}>
   <Space wrap style={{justifyContent:'space-between',width:'100%'}}>
-   <div><Typography.Title level={4} style={{margin:0}}>Uso do Codex</Typography.Title><Typography.Text type="secondary">Consumo da conta conectada e renovação dos limites.</Typography.Text></div>
+   <div><Typography.Title level={4} style={{margin:0}}>Uso do Codex</Typography.Title><Typography.Text type="secondary">Consumo da conta conectada, renovação e redefinições disponíveis.</Typography.Text></div>
    <Space><Tag color={demo?'blue':confirmed?'green':'default'}>{demo?'Dados fictícios':confirmed?'Leitura confirmada':'Leitura não confirmada'}</Tag><Button loading={busy} disabled={!online&&!demo} onClick={()=>setRetry(value=>value+1)}>Atualizar uso</Button></Space>
   </Space>
   {!demo&&!confirmed&&<Alert type="warning" showIcon message="Uso não confirmado" description={windows.length?'Os números abaixo são da última leitura. A consulta continua automaticamente enquanto esta aba estiver aberta.':'Conecte o monitor e use um chat vinculado no Codex para disponibilizar a leitura. Dados ausentes não representam consumo zero.'}/>}
+  <Card size="small"><Statistic title="Redefinições disponíveis" value={Number.isSafeInteger(data?.availableResets)&&data.availableResets>=0?data.availableResets:'Não informado'}/></Card>
   {windows.length?<Row gutter={[16,16]}>{windows.map((window,index)=>{
    const elapsed=Math.max(0,Math.min(100,(1-(window.resetsAt-clock/1000)/(window.windowDurationMins*60))*100));
    return <Col xs={24} xl={windows.length===1?24:12} key={window.label+window.key+index}><Card style={{borderTop:'3px solid '+token.colorPrimary}}>

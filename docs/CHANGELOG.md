@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## 0.7.1 — 2026-10-09
+
+- Contador Redefinições disponíveis na página Uso do Codex, com atualização automática e leitura exclusiva de availableCount.
+- Dado ausente aparece como Não informado; zero explícito é preservado. Nenhuma redefinição é consumida, e detalhes/IDs não são expostos nem persistidos.
+
 ## 0.7.0 — 2026-10-09
 
 - Página Uso do Codex no menu esquerdo, abaixo de Monitor Codex, com cota consumida/disponível e próxima renovação, seguindo o tema do NocoBase.

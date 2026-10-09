@@ -199,7 +199,9 @@ Leia os dois blocos novamente depois de salvar. Reabra as páginas e confira
 que os blocos persistiram. Não declare sucesso apenas porque a API de gravação
 respondeu. Na página de uso, verifique a leitura real e a mudança automática
 do horário de última leitura, sem clique, após pelo menos um minuto. Ausência
-de janela ou erro da fonte não significa consumo zero.
+de janela ou erro da fonte não significa consumo zero. Confira também
+Redefinições disponíveis: usar somente o contador retornado; dado ausente
+é Não informado, e zero explícito deve aparecer como zero. Não consumir resets.
 
 ### 6. Escolher conexão com ou sem extensão
 
