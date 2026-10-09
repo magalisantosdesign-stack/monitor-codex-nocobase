@@ -104,6 +104,8 @@ Para uso real, ajuste `MONITOR_CONFIG` no início do bloco:
 
 O painel depende das bibliotecas do NocoBase; não é uma página HTML independente. Sua conta precisa poder ler as coleções e editar o campo de vínculo.
 
+Para incluir a página, crie um item **Uso do Codex** no mesmo grupo do menu esquerdo, abaixo de **Monitor Codex**, adicione um bloco JavaScript/RunJS e use `src/panel-usage.jsx`. Configure `USAGE_CONFIG` na sua cópia: `demo: false` e o `endpoint` do seu coletor. Não é necessário criar coleções ou cadastrar a conta.
+
 ### 3. Instalar e confiar nos hooks
 
 Na pasta do monitor, execute primeiro a prévia:
@@ -253,3 +255,9 @@ A confirmação de captura é mantida em memória e não é exportada. Enquanto 
 ## Atualizar uma instalação anterior a 0.6.4
 
 Desconecte o coletor antes de atualizar os arquivos. Preserve `config.local.json` e `.local/` na raiz, reinstale os hooks com `npm run hooks:install` e revise a confiança solicitada pelo Codex. Se usa extensão, execute novamente `scripts/Instalar-Ponte-Navegadores.ps1` e carregue `extensions/chromium` ou `extensions/firefox` no navegador. O bloco do NocoBase usa agora `src/panel.jsx`. A atualização não instala nada automaticamente.
+
+## Uso do Codex
+
+A nova página **Uso do Codex**, no menu esquerdo abaixo de **Monitor Codex**, mostra consumo, percentual disponível e próxima renovação das janelas retornadas pela conta conectada. Atualiza automaticamente a cada minuto enquanto aberta e oferece **Atualizar uso**. O Kanban e o Stand-by continuam na página Monitor Codex.
+
+Esses limites são compartilhados pela conta inteira, incluindo chats não vinculados. Não são tokens por tarefa nem uma estimativa de custo. Quando a fonte não responder, a aba sinaliza leitura não confirmada e preserva a última leitura com seu horário; ausência de dados nunca significa zero. A integração usa a ponte opcional do desktop e requer pelo menos um contexto real de chat vinculado disponível; alterações no aplicativo podem afetar sua compatibilidade. O modo de demonstração mostra apenas números fictícios, sem consultas.

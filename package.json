@@ -1,6 +1,6 @@
 {
   "name": "monitor-codex-nocobase",
-  "version": "0.6.8",
+  "version": "0.7.0",
   "private": true,
   "license": "MIT",
   "description": "Monitor local de chats vinculados ao NocoBase, com Kanban e demonstração fictícia.",
@@ -11,7 +11,7 @@
   "scripts": {
     "start": "node scripts/Iniciar-Monitor.mjs",
     "server": "node src/server.mjs",
-    "test": "node tests/health-test.mjs && node tests/health-integration-test.mjs && node tests/checkpoint-test.mjs && node tests/checkpoint-integration-test.mjs && node tests/runtime-test.mjs && node tests/runtime-integration-test.mjs && node tests/test.mjs && node tests/config-test.mjs && node tests/startup-test.mjs && node tests/reconnect-test.mjs && node tests/standby-test.mjs && node tests/standby-integration-test.mjs && node tests/lifecycle-test.mjs && node tests/native-bridge-test.mjs && node tests/browser-test.mjs && node tests/panel-connection-test.mjs && node tests/integration-test.mjs && node scripts/check-distribution.mjs",
+    "test": "node tests/usage-test.mjs && node tests/usage-integration-test.mjs && node tests/health-test.mjs && node tests/health-integration-test.mjs && node tests/checkpoint-test.mjs && node tests/checkpoint-integration-test.mjs && node tests/runtime-test.mjs && node tests/runtime-integration-test.mjs && node tests/test.mjs && node tests/config-test.mjs && node tests/startup-test.mjs && node tests/reconnect-test.mjs && node tests/standby-test.mjs && node tests/standby-integration-test.mjs && node tests/lifecycle-test.mjs && node tests/native-bridge-test.mjs && node tests/browser-test.mjs && node tests/panel-connection-test.mjs && node tests/integration-test.mjs && node scripts/check-distribution.mjs",
     "check:distribution": "node scripts/check-distribution.mjs",
     "hooks:plan": "node scripts/Install-Hooks.mjs",
     "hooks:install": "node scripts/Install-Hooks.mjs --apply",
@@ -80,6 +80,10 @@
     "tests/checkpoint-integration-test.mjs",
     "src/health.mjs",
     "tests/health-test.mjs",
-    "tests/health-integration-test.mjs"
+    "tests/health-integration-test.mjs",
+    "src/usage.mjs",
+    "tests/usage-test.mjs",
+    "tests/usage-integration-test.mjs",
+    "src/panel-usage.jsx"
   ]
 }

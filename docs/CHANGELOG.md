@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 0.7.0 — 2026-10-09
+
+- Página Uso do Codex no menu esquerdo, abaixo de Monitor Codex, com cota consumida/disponível e próxima renovação, seguindo o tema do NocoBase.
+- Leitura real por get_usage_limits, atualização automática, cache em memória e estado de leitura não confirmada. Limites da conta não são atribuídos a tarefas.
+- Demonstração fictícia e proteção de identidade, credenciais e conteúdo; Kanban e Stand-by preservados.
+
 ## 0.6.8 — 2026-10-09
 
 - README esclarece quando Docker Desktop é necessário para instalar e executar o NocoBase e quando uma instalação existente pode ser aproveitada.

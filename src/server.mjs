@@ -1,4 +1,5 @@
 import {config} from './config.mjs';
+import {createUsageReader} from './usage.mjs';
 import http from 'node:http';
 import {mkdir,readFile,writeFile,readdir,rename,unlink} from 'node:fs/promises';
 import {dirname,join} from 'node:path';
@@ -21,6 +22,11 @@ const startupSettings=await readReviewerSettings();
 let reconciled=false;
 for(const id of registry.ids){const old=states[id];states[id]=reconcileApprovalReviewer(old,reviewerFromSnapshot(startupSettings,id));if(states[id]!==old)reconciled=true;}
 if(reconciled)await save('states.json',states);
+const readUsage=createUsageReader({bridges:async()=>{
+ const values=[];
+ for(const id of [...registry.ids]){const value=await load(join('desktop-bridges',id+'.json'),null);if(value&&value.threadId===id)values.push(value);}
+ return values;
+}});
 let tail=Promise.resolve();
 function serial(fn){const result=tail.then(fn);tail=result.catch(()=>{});return result;}
 async function consume(){
@@ -141,6 +147,9 @@ const server=http.createServer(async(req,res)=>{
     await save('standby.json',updated);standby=updated;return 200;
    });
    res.setHeader('Content-Type','application/json');res.writeHead(code);res.end(code===200?'{"ok":true}':'{"error":"standby unavailable"}');return;
+  }
+  if(req.url==='/usage'&&req.method==='GET'){
+   const result=await readUsage();res.setHeader('Content-Type','application/json');res.end(JSON.stringify({...result,instanceId:config.instanceId}));return;
   }
   if(req.url==='/states'&&req.method==='GET'){
    await serial(consume);const at=Date.now(),view=Object.fromEntries(Object.entries(visibleStates(registry.ids,states,standby)).map(([id,state])=>[id,displayState(state,health[id],at)]));

@@ -187,8 +187,19 @@ tarefa/projeto já cadastrado; ele não precisa de uma lista nova de acompanhame
 Verifique leitura das coleções e edição do campo de link com a conta usada.
 Não amplie permissões globais para resolver acesso negado.
 
-Leia o bloco novamente depois de salvar. Reabra a página e confira que o bloco
-persistiu. Não declare sucesso apenas porque a API de gravação respondeu.
+No mesmo grupo do menu esquerdo, prepare também **Uso do Codex**, abaixo de
+**Monitor Codex**, com um bloco JavaScript/RunJS usando `src/panel-usage.jsx`.
+Evite duplicar uma página já existente. Valide primeiro a demonstração e
+configure `USAGE_CONFIG` na cópia local: `demo: false` e o mesmo `endpoint`
+do coletor. Essa página não exige novas coleções nem cadastro de conta; usa
+limites da conta conectada pela ponte do desktop. Exige um contexto real de
+chat vinculado disponível e informa quando a leitura não puder ser confirmada.
+
+Leia os dois blocos novamente depois de salvar. Reabra as páginas e confira
+que os blocos persistiram. Não declare sucesso apenas porque a API de gravação
+respondeu. Na página de uso, verifique a leitura real e a mudança automática
+do horário de última leitura, sem clique, após pelo menos um minuto. Ausência
+de janela ou erro da fonte não significa consumo zero.
 
 ### 6. Escolher conexão com ou sem extensão
 

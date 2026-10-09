@@ -17,7 +17,7 @@ function run(exe,args,env){return new Promise((resolve,reject)=>{
 async function fixture(){
  const base=await mkdtemp(join(tmpdir(),'monitor-startup-'));
  const install=join(base,"pacote com espacos e 'apostrofo'");await mkdir(install);
- for(const file of ['scripts/Iniciar-Monitor.mjs','src/server.mjs','src/config.mjs','src/state.mjs','src/standby.mjs','src/permissions.mjs','src/runtime.mjs','src/health.mjs','scripts/Diagnosticar-Monitor.mjs','scripts/Reconectar-Monitor.ps1','scripts/Instalar-Reconexao.ps1','scripts/Remover-Integracao-Windows.ps1']){await mkdir(join(install,file,'..'),{recursive:true});await cp(join(root,file),join(install,file));}
+ for(const file of ['scripts/Iniciar-Monitor.mjs','src/server.mjs','src/config.mjs','src/state.mjs','src/standby.mjs','src/permissions.mjs','src/runtime.mjs','src/health.mjs','src/usage.mjs','scripts/Diagnosticar-Monitor.mjs','scripts/Reconectar-Monitor.ps1','scripts/Instalar-Reconexao.ps1','scripts/Remover-Integracao-Windows.ps1']){await mkdir(join(install,file,'..'),{recursive:true});await cp(join(root,file),join(install,file));}
  const socket=http.createServer();await new Promise(resolve=>socket.listen(0,'127.0.0.1',resolve));const port=socket.address().port;await new Promise(resolve=>socket.close(resolve));
  await writeFile(join(install,'config.local.json'),JSON.stringify({port,origins:['http://localhost:14000']}));
  const env={...process.env,CODEX_HOME:join(base,'fake-codex'),CODEX_MONITOR_SETTINGS:join(base,'missing.json')};

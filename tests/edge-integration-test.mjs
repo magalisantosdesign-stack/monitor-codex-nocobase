@@ -36,7 +36,7 @@ if($Remove) {
 `);
 const nativeManifest=join(install,'.local','chrome-native-host.json');
 try{
- for(const file of ['scripts/Chrome-Monitor.ps1','scripts/Iniciar-Monitor.mjs','src/server.mjs','src/config.mjs','src/state.mjs','src/standby.mjs','src/permissions.mjs','src/runtime.mjs','src/health.mjs','extensions/chromium/manifest.json','extensions/chromium/background.js','extensions/chromium/content.js']){await fs.mkdir(join(install,file,'..'),{recursive:true});await fs.copyFile(join(sourceRoot,file),join(install,file));}
+ for(const file of ['scripts/Chrome-Monitor.ps1','scripts/Iniciar-Monitor.mjs','src/server.mjs','src/config.mjs','src/state.mjs','src/standby.mjs','src/permissions.mjs','src/runtime.mjs','src/health.mjs','src/usage.mjs','extensions/chromium/manifest.json','extensions/chromium/background.js','extensions/chromium/content.js']){await fs.mkdir(join(install,file,'..'),{recursive:true});await fs.copyFile(join(sourceRoot,file),join(install,file));}
  const manifest=JSON.parse(await fs.readFile(join(install,'extensions/chromium/manifest.json'),'utf8'));
  manifest.name='Monitor Codex — TESTE ISOLADO';manifest.content_scripts[0].matches=[origin+'/*'];
  await fs.writeFile(join(install,'extensions/chromium/manifest.json'),JSON.stringify(manifest));

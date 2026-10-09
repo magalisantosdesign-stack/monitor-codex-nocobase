@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {EventEmitter} from 'node:events';
+import {selectUsage,queryUsage,createUsageReader} from '../src/usage.mjs';
+const bridge={pipe:'\\\\.\\pipe\\monitor-usage-test',threadId:'00000000-0000-4000-8000-000000000001',turnId:'00000000-0000-4000-8000-000000000002'};
+const window={usedPercent:38,windowDurationMins:10080,resetsAt:2000000000};
+const wrap=value=>({success:true,contentItems:[{type:'inputText',text:JSON.stringify(value)}]});
+const raw={accountId:'SECRET_ACCOUNT',email:'SECRET_EMAIL',rateLimitResetCredits:{credits:[{id:'SECRET_RESET'}]},rateLimits:{limitId:'codex',planType:'pro',primary:window,secondary:null}};
+const selected=selectUsage(wrap(raw),1234);
+assert.equal(selected.scope,'account');assert.equal(selected.at,1234);
+assert.equal(selected.limits[0].windows[0].remainingPercent,62);
+assert.ok(!JSON.stringify(selected).includes('SECRET'));
+assert.equal(selectUsage(wrap({rateLimits:null})),null);
+assert.equal(selectUsage(wrap({rateLimits:{primary:{...window,usedPercent:101}}})),null);
+assert.equal(selectUsage(wrap({rateLimits:{primary:{...window,usedPercent:null}}})),null);
+assert.equal(selectUsage({success:false,contentItems:wrap(raw).contentItems}),null);
+const multi=selectUsage(wrap({rateLimits:{primary:window},rateLimitsByLimitId:{a:{limitName:'Models A',primary:null,secondary:window},b:{primary:{...window,usedPercent:0}}}}));
+assert.equal(multi.limits.length,2);assert.equal(multi.limits[0].windows[0].key,'secondary');assert.equal(multi.limits[1].windows[0].remainingPercent,100);
+let writes=0,destroyed=false;
+function connect(){const socket=new EventEmitter();socket.destroy=()=>{destroyed=true;};socket.write=frame=>{
+ writes++;const request=JSON.parse(frame.subarray(4));assert.equal(request.params.tool,'get_usage_limits');assert.deepEqual(request.params.arguments,{});assert.equal(request.params.threadId,bridge.threadId);assert.equal(request.params.turnId,bridge.turnId);
+ const payload=Buffer.from(JSON.stringify({id:1,result:wrap(raw)})),response=Buffer.alloc(payload.length+4);response.writeUInt32LE(payload.length);payload.copy(response,4);
+ queueMicrotask(()=>{socket.emit('data',response.subarray(0,2));socket.emit('data',response.subarray(2));});
+ };queueMicrotask(()=>socket.emit('connect'));return socket;}
+assert.equal((await queryUsage(bridge,{connect,now:()=>1234})).at,1234);assert.equal(writes,1);assert.equal(destroyed,true);
+assert.equal(await queryUsage({...bridge,pipe:'invalid'},{connect}),null);assert.equal(writes,1);
+const timeout=()=>{const socket=new EventEmitter();socket.destroy=()=>{};socket.write=()=>{};return socket;};
+assert.equal(await queryUsage(bridge,{connect:timeout,timeoutMs:10}),null);
+let clock=1000,calls=0,fail=false;
+const reader=createUsageReader({bridges:async()=>[bridge],now:()=>clock,query:async()=>{calls++;await new Promise(resolve=>setTimeout(resolve,5));return fail?null:selected;}});
+const both=await Promise.all([reader(),reader()]);assert.equal(calls,1);assert.equal(both[0].confirmed,true);await reader();assert.equal(calls,1);
+clock+=61000;fail=true;const stale=await reader();assert.equal(calls,2);assert.equal(stale.confirmed,false);assert.equal(stale.limits[0].windows[0].usedPercent,38);assert.equal(stale.at,1234);
+clock+=61000;fail=false;assert.equal((await reader()).confirmed,true);assert.equal(calls,3);
+const absent=createUsageReader({bridges:async()=>[],query:async()=>{throw new Error('must not query');}});assert.deepEqual((await absent()).limits,[]);assert.equal((await absent()).confirmed,false);
+console.log('PASS: usage whitelist, null/multiple windows, privacy, exact read-only bridge call, framing, timeout, cache, concurrency and recovery.');
