@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 0.6.7 — 2026-10-09
+
+- README reorganizado para apresentar instalação automática assistida pelo Codex via .md e instalação manual como duas opções explícitas.
+- Configurações manuais em bloco recolhível, com orientação específica para cada caminho; conexão com/sem extensão separada da forma de instalação.
+- Código, guia de instalação e licença preservados.
+
 ## 0.6.6 — 2026-10-09
 
 - Guia INSTALAR-COM-CODEX.md para instalação assistida: descoberta de requisitos, instalação de componentes ausentes, configuração do coletor/painel, intervenções humanas e testes reais.

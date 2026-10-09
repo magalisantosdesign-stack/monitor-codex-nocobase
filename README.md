@@ -4,35 +4,36 @@ Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processan
 
 O pacote começa **em demonstração, com seis cartões fictícios**. Nesse modo não lê cadastros, chama o coletor ou salva vínculos. Dados pessoais, conversas e configurações de conta não acompanham a distribuição. Este é um projeto independente, sem vínculo oficial com Codex ou NocoBase.
 
-## Instalar com ajuda do Codex
+## Escolha como instalar
 
-Extraia o pacote em uma pasta permanente, abra essa pasta no **Codex local** e envie:
+Você pode escolher **um dos dois caminhos**. Ambos entregam o mesmo monitor e permitem usar a conexão com ou sem extensão.
+
+| Instalação | Quem faz a preparação | Como começar |
+| --- | --- | --- |
+| **Automática assistida pelo Codex via .md** | O Codex verifica requisitos, instala componentes ausentes, configura e testa | Abra a pasta no Codex e peça para executar [INSTALAR-COM-CODEX.md](docs/INSTALAR-COM-CODEX.md) |
+| **Manual** | Você executa os comandos e configura o painel | Siga a seção [Instalação manual](#instalação-manual) deste README |
+
+### Opção 1 — instalação automática assistida pelo Codex (.md)
+
+1. Baixe e extraia o projeto em uma pasta permanente no computador onde usa o Codex.
+2. Abra essa pasta como projeto no **Codex local**.
+3. Envie o pedido abaixo. Se souber, acrescente o endereço do NocoBase e seu navegador.
 
 > Leia docs/INSTALAR-COM-CODEX.md e execute a instalação do monitor neste computador. Verifique os requisitos, instale o que faltar, faça as configurações e os testes e me oriente nas etapas que exigirem minha ação. Preserve meu ambiente e não configure início automático com o Windows.
 
-O [roteiro de instalação](docs/INSTALAR-COM-CODEX.md) orienta o agente a aproveitar os componentes existentes, preparar o coletor e o painel, configurar a conexão com ou sem extensão e verificar eventos reais. Login, confiança dos hooks e carregamento da extensão podem exigir sua ação. Não é necessário entender os comandos abaixo para usar esse caminho.
+O [arquivo de instalação](docs/INSTALAR-COM-CODEX.md) orienta o Codex a aproveitar componentes existentes, preparar o coletor e o painel no NocoBase e verificar a atualização automática dos estados. O agente deve informar resultados e pendências e pode retomar a instalação após uma interrupção.
 
-## Organização do projeto
+Você acompanha o processo e realiza as intervenções solicitadas, como login, permissões do sistema, confiança dos hooks e carregamento da extensão, caso escolha usá-la. O .md é o roteiro que o Codex executa com suas ferramentas; não é um executável. As etapas automáticas dependem de acesso autorizado ao computador e ao NocoBase.
 
-```text
-monitor-codex-nocobase/
-├── src/          Código do coletor e painel JSX
-├── tests/        Testes com dados fictícios
-├── scripts/      Instalação, inicialização, diagnóstico e exportação
-├── extensions/  Extensões Chromium e Firefox
-├── docs/         Guias de navegadores, privacidade e histórico
-├── Iniciar-Monitor.cmd
-├── Diagnosticar-Monitor.cmd
-├── LICENSE
-├── config.example.json
-└── package.json
-```
+**Neste caminho, o Codex conduz a preparação. Os comandos da seção manual são uma alternativa, não uma etapa adicional obrigatória.**
 
-Execute os comandos deste guia na raiz do projeto. `config.local.json` e `.local/` continuam nessa raiz e não são publicados.
+### Opção 2 — instalação manual
 
-## Escolha como iniciar
+Se preferir fazer a preparação por conta própria, confira os requisitos abaixo e abra os passos recolhidos em [Instalação manual](#instalação-manual). Esse caminho mantém os comandos e configurações detalhados para o coletor, o painel e os hooks.
 
-A extensão é **opcional**. Os dois caminhos usam o mesmo coletor e oferecem a mesma atualização automática dos estados.
+## Como iniciar e encerrar depois da instalação
+
+A extensão é **opcional**, tanto na instalação pelo Codex quanto na manual. Escolha como quer iniciar o monitor no dia a dia; essa escolha é independente de quem fez a instalação. As duas opções usam o mesmo coletor e oferecem a mesma atualização automática dos estados.
 
 | | Sem extensão | Com extensão |
 | --- | --- | --- |
@@ -46,6 +47,8 @@ A extensão é **opcional**. Os dois caminhos usam o mesmo coletor e oferecem a 
 
 ## Requisitos
 
+Na instalação via .md, o Codex verifica estes requisitos e prepara os componentes ausentes. Na instalação manual, faça essa verificação antes dos passos abaixo.
+
 - Node.js **22 ou superior**; testes executados com Node.js 24. O coletor não exige `npm install`.
 - NocoBase **2**, com bloco JavaScript/RunJS que disponibilize `ctx.libs.React`, `ctx.libs.antd` e `MultiRecordResource`.
 - Codex local com os eventos de hooks necessários disponíveis e confiados pelo usuário.
@@ -53,7 +56,16 @@ A extensão é **opcional**. Os dois caminhos usam o mesmo coletor e oferecem a 
 
 O botão via extensão foi verificado no Chrome e no Edge no Windows. Brave, Opera/GX e Firefox têm pacotes e testes isolados, mas ainda precisam de validação no navegador real. A instalação permanente no Firefox exige assinatura Mozilla, ainda não fornecida. Safari e navegadores móveis não têm ponte neste pacote. Detalhes em [docs/NAVEGADORES.md](docs/NAVEGADORES.md).
 
-## Preparação comum aos dois caminhos
+## Instalação manual
+
+**Somente para quem escolheu instalar manualmente.** Se escolheu a instalação pelo Codex via .md, deixe o agente conduzir a configuração.
+
+<details>
+<summary><strong>Abrir os passos e comandos da instalação manual</strong></summary>
+
+Siga esta seção se escolheu a **Opção 2 — instalação manual**. Na opção via .md, o Codex conduz essas tarefas pelo roteiro de instalação.
+
+Execute os comandos na raiz do projeto. As etapas 1 a 3 preparam o monitor; na etapa 4, escolha apenas uma opção de conexão.
 
 ### 1. Guardar e configurar o pacote
 
@@ -103,7 +115,7 @@ São registrados nove eventos, incluindo `PreCompact` e `PostCompact`, para comp
 
 Evite manter handlers de duas cópias do monitor para o mesmo uso. Se mover a pasta ou substituir uma instalação, revise os hooks antigos; instalar esta cópia não remove automaticamente os anteriores.
 
-## Caminho A — sem extensão
+### 4A. Conexão sem extensão
 
 1. Abra `Iniciar-Monitor.cmd` na pasta instalada. Alternativamente, execute `node scripts/Iniciar-Monitor.mjs` nessa pasta.
 2. Abra o painel do NocoBase e confira **Coletor conectado**. Se ele já estava aberto ou havia sido desconectado, clique em **Atualizar** para retomar a consulta.
@@ -114,9 +126,9 @@ Para iniciar novamente, repita os passos 1 e 2. **Atualizar** consulta o serviç
 
 Esse caminho não exige instalar a ponte, registrar um protocolo, instalar extensão ou criar uma entrada de inicialização do Windows. O Node precisa estar disponível no PATH para usar o iniciador diretamente.
 
-## Caminho B — com extensão
+### 4B. Conexão com extensão
 
-Depois da preparação comum, execute no PowerShell, dentro da pasta permanente do monitor:
+Depois das etapas 1 a 3, execute no PowerShell, dentro da pasta permanente do monitor:
 
 ```powershell
 .\scripts/Instalar-Ponte-Navegadores.ps1 -Browsers Chrome,Edge -Preview
@@ -135,6 +147,8 @@ Carregue a extensão explicitamente, conforme [docs/NAVEGADORES.md](docs/NAVEGAD
 A extensão encaminha somente a ação fixa de iniciar a partir do botão nas origens locais configuradas. Não lê cartões, conversas ou outros sites. A comunicação usa Native Messaging. O instalador não altera políticas do navegador nem configura início automático.
 
 Se Node ou a pasta instalada mudar, refaça a ponte. Antes de mover a pasta, remova os registros da instalação antiga. Os arquivos privados da ponte não acompanham a exportação. Políticas corporativas podem impedir scripts ou extensões; o pacote não as modifica.
+
+</details>
 
 ## Vínculos e Stand-by
 
@@ -176,6 +190,24 @@ O protocolo externo `codex-monitor://reconnect` permanece uma alternativa de com
 O clique real foi confirmado no Chrome; a desconexão foi verificada pela ausência do processo do coletor, PID e listener. O teste isolado com navegador real passou no Edge. O Firefox foi testado em Job Object sintético para confirmar que o Node sobrevive ao host. Esses resultados não comprovam funcionamento em todos os computadores. Um reinício físico do Windows com a ponte atual ainda precisa ser validado.
 
 Referências: [Hooks do Codex](https://learn.chatgpt.com/docs/hooks) e [revisão automática](https://learn.chatgpt.com/docs/sandboxing/auto-review).
+
+## Organização do projeto
+
+```text
+monitor-codex-nocobase/
+├── src/          Código do coletor e painel JSX
+├── tests/        Testes com dados fictícios
+├── scripts/      Instalação, inicialização, diagnóstico e exportação
+├── extensions/  Extensões Chromium e Firefox
+├── docs/         Guias de navegadores, privacidade e histórico
+├── Iniciar-Monitor.cmd
+├── Diagnosticar-Monitor.cmd
+├── LICENSE
+├── config.example.json
+└── package.json
+```
+
+Execute os comandos deste guia na raiz do projeto. `config.local.json` e `.local/` continuam nessa raiz e não são publicados.
 
 ## Desenvolvimento e publicação
 
