@@ -15,6 +15,7 @@ if(!Array.isArray(origins)||!origins.length||origins.some(origin=>{
 }))throw new Error('Informe origens locais completas, sem curingas ou caminhos.');
 const codexHome=resolve(process.env.CODEX_HOME||local.codexHome||join(homedir(),'.codex'));
 export const config={port,origins,codexHome,
+ codexExecutable:process.env.CODEX_MONITOR_CODEX_EXECUTABLE||local.codexExecutable||undefined,
  dataDir:resolve(root,process.env.CODEX_MONITOR_DATA||local.dataDir||'.local/data'),
  settingsFile:resolve(root,process.env.CODEX_MONITOR_SETTINGS||local.settingsFile||join(codexHome,'.codex-global-state.json')),
  instanceId:createHash('sha256').update(root).digest('hex').slice(0,24)};

@@ -1,5 +1,6 @@
 import {config} from './config.mjs';
 import {createUsageReader} from './usage.mjs';
+import {createTokenReader} from './tokens.mjs';
 import http from 'node:http';
 import {mkdir,readFile,writeFile,readdir,rename,unlink} from 'node:fs/promises';
 import {dirname,join} from 'node:path';
@@ -27,6 +28,7 @@ const readUsage=createUsageReader({bridges:async()=>{
  for(const id of [...registry.ids]){const value=await load(join('desktop-bridges',id+'.json'),null);if(value&&value.threadId===id)values.push(value);}
  return values;
 }});
+const readTokens=createTokenReader({codexHome:config.codexHome,executable:config.codexExecutable,ids:()=>registry.ids});
 let tail=Promise.resolve();
 function serial(fn){const result=tail.then(fn);tail=result.catch(()=>{});return result;}
 async function consume(){
@@ -148,6 +150,9 @@ const server=http.createServer(async(req,res)=>{
    });
    res.setHeader('Content-Type','application/json');res.writeHead(code);res.end(code===200?'{"ok":true}':'{"error":"standby unavailable"}');return;
   }
+  if(req.url==='/tokens'&&req.method==='GET'){
+   const result=await readTokens();res.setHeader('Content-Type','application/json');res.end(JSON.stringify({...result,instanceId:config.instanceId}));return;
+  }
   if(req.url==='/usage'&&req.method==='GET'){
    const result=await readUsage();res.setHeader('Content-Type','application/json');res.end(JSON.stringify({...result,instanceId:config.instanceId}));return;
   }
@@ -166,6 +171,7 @@ const server=http.createServer(async(req,res)=>{
 server.listen(port,'127.0.0.1',()=>process.stdout.write(`Codex monitor: http://127.0.0.1:${port}\n`));
 async function stop(){
  if(stopping)return;stopping=true;clearInterval(timer);clearInterval(runtimeTimer);
+ await readTokens.stop();
  try{await serial(consume);}catch{process.exitCode=1;}
  const deadline=setTimeout(()=>{server.closeAllConnections();process.exit(process.exitCode||0);},5000);deadline.unref();
  server.close(async()=>{

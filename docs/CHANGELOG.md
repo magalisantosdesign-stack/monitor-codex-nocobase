@@ -1,5 +1,12 @@
 # Histórico de versões
 
+## 0.8.0 — 2026-10-09
+
+- Analytics na página Uso do Codex: resumo da conta, histórico diário, seleção de período, comparação e tabela de chats vinculados, com CSV.
+- Fontes separadas: account/usage/read para conta e metadados locais numéricos somente para chats vinculados.
+- Consulta transitória com timeout e cancelamento ao desconectar, cache em memória, ausência distinta de zero e preservação de última leitura.
+- Demonstração fictícia, tema responsivo e testes de privacidade/leitura/parada; sem transcrições ou dados pessoais no pacote.
+
 ## 0.7.2 — 2026-10-09
 
 - Redefinições disponíveis listadas individualmente com validade, em caixinha ao lado da próxima renovação e empilhada em telas menores.

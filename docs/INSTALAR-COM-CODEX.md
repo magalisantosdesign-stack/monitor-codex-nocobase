@@ -344,3 +344,10 @@ início automático com o Windows como parte desta instalação.
 - [NocoBase: instalação e conexão pelo CLI](https://docs.nocobase.com/nocobase-cli/installation/cli)
 - [Codex: hooks e revisão de confiança](https://learn.chatgpt.com/docs/hooks)
 - [Guia do monitor](../README.md) e [guia dos navegadores](NAVEGADORES.md)
+
+
+## Preparar analytics de tokens
+
+A página Uso do Codex inclui as métricas de tokens no mesmo bloco. Ao configurá-la, alinhe USAGE_CONFIG.sources com as coleções e os campos de título/link do Monitor. Verifique Node com node:sqlite (Node 24 recomendado) e Codex local conectado e compatível com account/usage/read. Resolva o binário real; quando necessário, guarde codexExecutable absoluto somente em config.local.json, nunca no código público. Não instale a skill de referência nem leia transcrições para compensar uma fonte ausente.
+
+Valide GET /tokens com a origem permitida: conta e metadados por chat devem ter confirmação independente; valores ausentes não são zero. A leitura local limita-se aos IDs vinculados. Confira período do gráfico, média pelos dias informados, tabela sem duplicar o mesmo chat, nomes vindos dos cadastros, exportação por clique e tema responsivo. Verifique a atualização a cada minuto e cancelamento de consultas pendentes no Desconectar. Caso a versão do Codex não exponha a consulta, informe a limitação sem inventar números nem modificar o banco. Tokens não são custos, créditos ou porcentagem de cota.

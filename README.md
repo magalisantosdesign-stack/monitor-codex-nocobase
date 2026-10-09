@@ -1,6 +1,6 @@
 # Monitor Codex para NocoBase
 
-Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processando**, **Aguardando aprovação**, **Aguardando resposta**, **Respondido**, **Interrompido** **Sem sinal** e **Estado não confirmado**. Oferece Stand-by, atualização automática e suporte aos temas claro e escuro. O estado do chat é independente da situação da tarefa ou projeto.
+Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processando**, **Aguardando aprovação**, **Aguardando resposta**, **Respondido**, **Interrompido** **Sem sinal** e **Estado não confirmado**. Inclui a página **Uso do Codex**, com cota, renovação, validade das redefinições, histórico diário de tokens da conta e acumulado por chat vinculado. Oferece Stand-by, atualização automática e suporte aos temas claro e escuro. O estado do chat é independente da situação da tarefa ou projeto.
 
 O pacote começa **em demonstração, com seis cartões fictícios**. Nesse modo não lê cadastros, chama o coletor ou salva vínculos. Dados pessoais, conversas e configurações de conta não acompanham a distribuição. Este é um projeto independente, sem vínculo oficial com Codex ou NocoBase.
 
@@ -49,7 +49,7 @@ A extensão é **opcional**, tanto na instalação pelo Codex quanto na manual. 
 
 Na instalação via .md, o Codex verifica estes requisitos e prepara os componentes ausentes. Na instalação manual, faça essa verificação antes dos passos abaixo.
 
-- Node.js **22 ou superior**; testes executados com Node.js 24. O coletor não exige `npm install`.
+- Node.js **22 ou superior** para estados; **Node.js 24 recomendado para tokens por chat** (usa `node:sqlite`); testes executados com Node.js 24. O coletor não exige `npm install`.
 - NocoBase **2**, com bloco JavaScript/RunJS que disponibilize `ctx.libs.React`, `ctx.libs.antd` e `MultiRecordResource`.
 - **Docker Desktop**, no Windows, se o NocoBase for instalado pelo Docker. Nesse caso, o Docker precisa estar instalado e em execução para usar o painel.
 - Codex local com os eventos de hooks necessários disponíveis e confiados pelo usuário.
@@ -104,7 +104,7 @@ Para uso real, ajuste `MONITOR_CONFIG` no início do bloco:
 
 O painel depende das bibliotecas do NocoBase; não é uma página HTML independente. Sua conta precisa poder ler as coleções e editar o campo de vínculo.
 
-Para incluir a página, crie um item **Uso do Codex** no mesmo grupo do menu esquerdo, abaixo de **Monitor Codex**, adicione um bloco JavaScript/RunJS e use `src/panel-usage.jsx`. Configure `USAGE_CONFIG` na sua cópia: `demo: false` e o `endpoint` do seu coletor. Não é necessário criar coleções ou cadastrar a conta.
+Para incluir a página, crie um item **Uso do Codex** no mesmo grupo do menu esquerdo, abaixo de **Monitor Codex**, adicione um bloco JavaScript/RunJS e use `src/panel-usage.jsx`. Configure `USAGE_CONFIG` na sua cópia: `demo: false` e o `endpoint` do seu coletor. Configure também `sources` com as mesmas coleções e campos `titleField`/`linkField` usados no Monitor, para identificar os chats na tabela. Não é necessário criar coleções ou cadastrar a conta.
 
 ### 3. Instalar e confiar nos hooks
 
@@ -261,3 +261,14 @@ Desconecte o coletor antes de atualizar os arquivos. Preserve `config.local.json
 A nova página **Uso do Codex**, no menu esquerdo abaixo de **Monitor Codex**, mostra consumo, percentual disponível, próxima renovação das janelas e redefinições disponíveis retornadas pela conta conectada. As redefinições disponíveis aparecem em uma caixinha ao lado da próxima renovação, com a validade individual quando fornecida. Em telas menores, ficam abaixo da renovação. A quantidade de redefinições é apenas consultada; o painel não utiliza esse benefício. Quando o contador não for fornecido, aparece Não informado. Atualiza automaticamente a cada minuto enquanto aberta e oferece **Atualizar uso**. O Kanban e o Stand-by continuam na página Monitor Codex.
 
 Esses limites são compartilhados pela conta inteira, incluindo chats não vinculados. Não são tokens por tarefa nem uma estimativa de custo. Quando a fonte não responder, a aba sinaliza leitura não confirmada e preserva a última leitura com seu horário; ausência de dados nunca significa zero. A integração usa a ponte opcional do desktop e requer pelo menos um contexto real de chat vinculado disponível; alterações no aplicativo podem afetar sua compatibilidade. O modo de demonstração mostra apenas números fictícios, sem consultas.
+
+
+## Analytics de tokens
+
+Em **Uso do Codex**, o monitor apresenta cards de resumo, gráfico diário da conta, participação entre os chats vinculados e uma tabela ordenável, com exportação CSV por clique. O filtro seleciona 7, 30 ou 90 dias informados pela fonte; dias ausentes não são inventados como zero. O acumulado por chat inclui Stand-by e não é filtrado pelo período do gráfico.
+
+As fontes são independentes: o Codex fornece o total da conta e seu histórico diário por [`account/usage/read`](https://learn.chatgpt.com/docs/app-server); o total local por chat vem exclusivamente do campo numérico `tokens_used` nos metadados locais. O histórico da conta pode cobrir só parte do acumulado. Tokens não são porcentagem de cota, créditos ou dinheiro. Esta versão não fornece divisão confirmada de entrada/saída/cache nem custos. A consulta experimental pode ficar indisponível conforme a versão do Codex; nesse caso o painel mostra **Não confirmado** e preserva a última leitura.
+
+Requer Codex local compatível e conectado, além de Node com `node:sqlite` para a leitura por chat (Node 24 recomendado). O monitor procura `codex.exe` no PATH e na instalação do desktop. Se necessário, defina **somente na sua configuração privada** `codexExecutable` com o caminho absoluto do binário, ou `CODEX_MONITOR_CODEX_EXECUTABLE`. A conta não é cadastrada no painel: a consulta usa o login existente do Codex. Não há instalação de outra extensão nem serviço permanente para tokens.
+
+As consultas ocorrem a cada minuto enquanto a página está aberta. O subprocesso da consulta termina após a leitura; Desconectar também cancela a consulta pendente. O banco não é modificado nem exportado, transcrições não são lidas, e os resultados ficam somente em memória. CSVs podem conter nomes das suas tarefas e métricas; compartilhe-os apenas quando desejar.
