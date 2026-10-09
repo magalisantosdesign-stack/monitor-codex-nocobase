@@ -70,3 +70,4 @@ A flag waitingOnApproval do desktop deve ser combinada com approvalsReviewer do 
 
 - O README deve apresentar no início as duas opções de instalação: automática assistida pelo Codex via docs/INSTALAR-COM-CODEX.md e manual. Distinguir essas opções da conexão com/sem extensão, disponível em ambas. Informar intervenções humanas e não apresentar o .md como executável ou garantia de instalação sem acesso autorizado.
 - Manter os comandos/configurações de instalação manual no bloco recolhível próprio do README, com orientação explícita de que o caminho via .md não exige executar esse bloco. Requisitos e uso diário comuns devem indicar a quem cada ação pertence.
+- Documentar Docker como requisito condicionado ao método de instalação do NocoBase, aproveitando aplicações existentes. Na rota Docker, verificar Docker instalado e em execução; distinguir o NocoBase no container do coletor Node.js local no Windows. Não exigir Docker apenas para o coletor.

@@ -51,8 +51,17 @@ Na instalação via .md, o Codex verifica estes requisitos e prepara os componen
 
 - Node.js **22 ou superior**; testes executados com Node.js 24. O coletor não exige `npm install`.
 - NocoBase **2**, com bloco JavaScript/RunJS que disponibilize `ctx.libs.React`, `ctx.libs.antd` e `MultiRecordResource`.
+- **Docker Desktop**, no Windows, se o NocoBase for instalado pelo Docker. Nesse caso, o Docker precisa estar instalado e em execução para usar o painel.
 - Codex local com os eventos de hooks necessários disponíveis e confiados pelo usuário.
 - Windows e PowerShell para os iniciadores `.cmd` e a ponte do navegador. Outros sistemas não foram validados nesta versão.
+
+### Quando preciso do Docker?
+
+**Se já tem NocoBase 2 funcionando**, aproveite essa instalação. Não precisa reinstalar o NocoBase nem instalar Docker apenas para adicionar o monitor.
+
+**Se vai instalar o NocoBase do zero pelo Docker**, precisa do Docker Desktop no Windows. Na instalação via .md, o Codex verifica se ele está instalado e funcionando, prepara o que faltar e orienta nas intervenções necessárias. Na instalação manual, prepare o Docker e siga o [guia oficial de instalação do NocoBase](https://docs.nocobase.com/get-started/installation/docker), usando a versão 2 compatível com este painel. O Docker é o método padrão do CLI do NocoBase; também existem opções por npm e Git, com seus próprios requisitos de aplicação e banco de dados. Veja a [referência oficial do CLI](https://docs.nocobase.com/api/cli/init).
+
+São dois componentes: **o NocoBase hospeda o painel** e pode rodar no Docker; **o coletor do monitor roda pelo Node.js no Windows**, fora do container, no computador onde você usa o Codex. Ele não exige Docker. Para acompanhar os estados, os dois precisam estar em execução.
 
 O botão via extensão foi verificado no Chrome e no Edge no Windows. Brave, Opera/GX e Firefox têm pacotes e testes isolados, mas ainda precisam de validação no navegador real. A instalação permanente no Firefox exige assinatura Mozilla, ainda não fornecida. Safari e navegadores móveis não têm ponte neste pacote. Detalhes em [docs/NAVEGADORES.md](docs/NAVEGADORES.md).
 

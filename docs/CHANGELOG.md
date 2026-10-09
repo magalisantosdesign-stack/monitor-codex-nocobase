@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 0.6.8 — 2026-10-09
+
+- README esclarece quando Docker Desktop é necessário para instalar e executar o NocoBase e quando uma instalação existente pode ser aproveitada.
+- Distinção entre NocoBase no Docker e coletor Node.js local, com orientação para os caminhos via Codex e manual e links oficiais.
+- Código e funcionamento do monitor preservados.
+
 ## 0.6.7 — 2026-10-09
 
 - README reorganizado para apresentar instalação automática assistida pelo Codex via .md e instalação manual como duas opções explícitas.
