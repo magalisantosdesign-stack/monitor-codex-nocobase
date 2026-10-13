@@ -1,6 +1,16 @@
 # Monitor Codex para NocoBase
 
-Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processando**, **Aguardando aprovação**, **Aguardando resposta**, **Respondido**, **Interrompido** **Sem sinal** e **Estado não confirmado**. Inclui a página **Uso do Codex**, com cota, renovação, validade das redefinições, histórico diário de tokens da conta e acumulado por chat vinculado. Oferece Stand-by, atualização automática e suporte aos temas claro e escuro. O estado do chat é independente da situação da tarefa ou projeto.
+Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processando**, **Aguardando aprovação**, **Aguardando resposta**, **Respondido**, **Interrompido**, **Sem sinal** e **Estado não confirmado**. Oferece Stand-by, atualização automática e suporte aos temas claro e escuro. O estado do chat é independente da situação da tarefa ou projeto.
+
+A página **Uso do Codex** reúne:
+
+- **Consumo e limites da conta:** cota disponível, próxima renovação e redefinições disponíveis com suas datas de validade.
+- **Tokens por período:** acumulado, Hoje, 07 dias, 30 dias e intervalo Personalizado, com histórico diário da conta e consumo registrado por chat.
+- **Filtros por tipo de projeto:** classificação manual em Pessoal ou Profissional, com a opção Não classificado para organizar os chats sem misturar os projetos.
+- **Arquivar e restaurar:** retire registros da análise principal e consulte-os em Arquivados, preservando o histórico. Remover ou trocar um vínculo também mantém o consumo já registrado.
+- **Exportação CSV:** baixe o histórico diário da conta no período selecionado ou os registros dos chats filtrados por período, tipo de projeto e aba.
+
+O histórico por chat começa na primeira coleta, com indicação de lacunas quando não é possível atribuir o consumo a uma data. Os filtros por tipo de projeto e arquivamento organizam somente os registros dos chats; o consumo geral da conta continua mostrando tudo.
 
 O pacote começa **em demonstração, com seis cartões fictícios**. Nesse modo não lê cadastros, chama o coletor ou salva vínculos. Dados pessoais, conversas e configurações de conta não acompanham a distribuição. Este é um projeto independente, sem vínculo oficial com Codex ou NocoBase.
 
