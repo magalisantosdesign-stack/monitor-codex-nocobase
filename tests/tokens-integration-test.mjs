@@ -22,9 +22,19 @@ try{
  assert.equal(value.history.rows[0].daily[0].tokens,0);
  await fetch(url+'/token-labels',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({labels:[{id,title:'Tarefa fictícia'}]})});
  assert.equal((await fetch(url+'/token-labels',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({labels:[{id,title:123}]})})).status,400);
+ const preferences=(changes,extra={})=>fetch(url+'/token-preferences',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({instanceId:value.instanceId,id,changes,...extra})});
+ assert.equal((await fetch(url+'/token-preferences',{method:'POST',headers:{Origin:'http://evil.example','Content-Type':'application/json'},body:JSON.stringify({instanceId:value.instanceId,id,changes:{archived:true}})})).status,403);
+ assert.equal((await preferences({archived:true},{instanceId:'wrong'})).status,409);
+ assert.equal((await preferences({category:'unknown'})).status,400);assert.equal((await preferences({archived:'yes'})).status,400);
+ assert.equal((await preferences({category:'personal'},{command:'FORBIDDEN'})).status,400);assert.equal((await preferences({category:'personal'},{id:'00000000-0000-4000-8000-000000000002'})).status,404);
+ assert.equal((await preferences({category:'personal',archived:true})).status,200);
+ const organized=await(await fetch(url+'/tokens',{headers})).json();assert.equal(organized.history.rows[0].category,'personal');assert.equal(organized.history.rows[0].usageArchived,true);assert.equal(organized.threads.rows[0].totalTokens,765432);
  await fetch(url+'/linked',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({ids:[]})});assert.deepEqual((await (await fetch(url+'/tokens',{headers})).json()).threads.rows,[]);const retained=await (await fetch(url+'/tokens',{headers})).json();assert.equal(retained.history.rows[0].active,false);assert.equal(retained.history.rows[0].title,'Tarefa fictícia');
+ assert.equal(retained.history.rows[0].category,'personal');assert.equal(retained.history.rows[0].usageArchived,true);
+ assert.equal((await preferences({archived:false})).status,200,'Unlinked historical records can still be restored');
  const shutdown=await fetch(url+'/shutdown',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({instanceId:value.instanceId})});assert.equal(shutdown.status,200);await exited;child=null;
  const history=JSON.parse(await readFile(join(base,'token-history.json'),'utf8'));assert.equal(history.threads[id].lastTotal,765432);assert.equal(history.threads[id].title,'Tarefa fictícia');
+ assert.equal(history.threads[id].category,'personal');assert.equal(history.threads[id].usageArchived,false);
  const check=new DatabaseSync(join(base,'state_5.sqlite'),{readOnly:true});assert.equal(check.prepare('SELECT tokens_used FROM threads WHERE id=?').get(id).tokens_used,765432);check.close();
  console.log('PASS: HTTP tokens CORS, no-store, unavailable account vs local tokens, immediate unlink pruning, database unchanged and shutdown.');
 }finally{if(child){child.kill();await exited;}assert.ok(resolve(base).startsWith(resolve(tmpdir())+sep));await rm(base,{recursive:true,force:true});}

@@ -379,6 +379,63 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
   const [custom, setCustom] = React.useState({ start: '', end: '' }),
     [draft, setDraft] = React.useState({ start: '', end: '' });
   const [dateError, setDateError] = React.useState('');
+  const [projectType, setProjectType] = React.useState('all'),
+    [usageView, setUsageView] = React.useState('visible');
+  const [changing, setChanging] = React.useState(null),
+    [actionError, setActionError] = React.useState('');
+  const changingRef = React.useRef(false),
+    preferenceEpoch = React.useRef(0),
+    demoPreferences = React.useRef(new Map());
+  const categoryNames = {
+    unclassified: 'Não classificado',
+    personal: 'Pessoal',
+    professional: 'Profissional',
+  };
+  const categoryOptions = Object.entries(categoryNames).map(([value, label]) => ({ value, label }));
+  async function changePreferences(row, changes) {
+    if (changingRef.current) return;
+    changingRef.current = true;
+    preferenceEpoch.current++;
+    setChanging(row.id);
+    setActionError('');
+    try {
+      if (!demo) {
+        const response = await window.fetch(endpoint + '/token-preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ instanceId: data?.instanceId, id: row.id, changes }),
+          signal: window.AbortSignal.timeout(7000),
+        });
+        if (!response.ok) throw new Error('preferences unavailable');
+      }
+      const patch = {
+        ...(Object.hasOwn(changes, 'category') ? { category: changes.category } : {}),
+        ...(Object.hasOwn(changes, 'archived') ? { usageArchived: changes.archived } : {}),
+      };
+      if (demo)
+        demoPreferences.current.set(row.id, {
+          ...(demoPreferences.current.get(row.id) || {}),
+          ...patch,
+        });
+      preferenceEpoch.current++;
+      setData((value) => ({
+        ...value,
+        history: {
+          ...value.history,
+          rows: value.history.rows.map((saved) =>
+            saved.id === row.id ? { ...saved, ...patch } : saved,
+          ),
+        },
+      }));
+    } catch {
+      setActionError(
+        'Não foi possível salvar a organização do consumo. Confira a conexão do monitor e tente novamente.',
+      );
+    } finally {
+      changingRef.current = false;
+      setChanging(null);
+    }
+  }
   function calendarDate(at, timeZone) {
     const parts = new Intl.DateTimeFormat('en-CA', {
       timeZone,
@@ -423,6 +480,7 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
       if (inFlight) return;
       inFlight = true;
       setBusy(true);
+      const requestEpoch = preferenceEpoch.current;
       try {
         let value;
         if (demo) {
@@ -474,6 +532,11 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
             rows: value.threads.rows.map((row) => ({
               id: row.id,
               active: true,
+              category: ['professional', 'personal', 'unclassified'][
+                value.threads.rows.indexOf(row)
+              ],
+              usageArchived: false,
+              ...(demoPreferences.current.get(row.id) || {}),
               sinceAt: Date.now() - 30 * 86400000,
               lastAt: Date.now(),
               lastTotal: row.totalTokens,
@@ -503,7 +566,7 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
               });
             } catch {}
         }
-        if (active) {
+        if (active && requestEpoch === preferenceEpoch.current) {
           setData(value);
           setFailed(false);
         }
@@ -571,7 +634,7 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
   for (const row of history.values())
     if (!sourceRows.has(row.id))
       sourceRows.set(row.id, { id: row.id, totalTokens: row.lastTotal, confirmed: false });
-  const rows = [...sourceRows.values()].map((row, i) => {
+  const allRows = [...sourceRows.values()].map((row, i) => {
     const saved = history.get(row.id),
       days = (saved?.daily || []).filter((day) => inPeriod(day.date));
     const recorded = days.length ? sum(days) : null;
@@ -580,6 +643,9 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
       ...row,
       key: row.id,
       archived,
+      category: saved?.category || 'unclassified',
+      usageArchived: saved?.usageArchived === true,
+      hasHistory: !!saved,
       sinceAt: saved?.sinceAt,
       lastAt: saved?.lastAt,
       unallocated: saved?.unallocatedTokens || 0,
@@ -604,6 +670,11 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
         'Chat histórico ' + (i + 1),
     };
   });
+  const categoryRows = allRows.filter(
+    (row) => projectType === 'all' || row.category === projectType,
+  );
+  const archivedCount = categoryRows.filter((row) => row.usageArchived).length;
+  const rows = categoryRows.filter((row) => row.usageArchived === (usageView === 'archived'));
   const known = rows.filter(
     (row) =>
       (accumulated ? row.confirmed || row.archived : row.periodConfirmed) &&
@@ -646,7 +717,7 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
             Tokens em perspectiva
           </Typography.Title>
           <Typography.Text type="secondary">
-            Consumo da conta e dos chats, separado por período.
+            Consumo da conta e dos chats, separado por período e tipo de projeto.
           </Typography.Text>
         </div>
         <Space wrap>
@@ -661,6 +732,43 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
           </Tag>
         </Space>
       </Space>
+      <Space wrap style={{ justifyContent: 'space-between', width: '100%' }}>
+        <Space wrap>
+          <Typography.Text>Tipo de projeto</Typography.Text>
+          <Select
+            aria-label="Filtrar tipo de projeto"
+            value={projectType}
+            onChange={setProjectType}
+            style={{ minWidth: 190 }}
+            options={[
+              { value: 'all', label: 'Todos' },
+              { value: 'professional', label: 'Profissionais' },
+              { value: 'personal', label: 'Pessoais' },
+              { value: 'unclassified', label: 'Não classificados' },
+            ]}
+          />
+        </Space>
+        <Typography.Text type="secondary">
+          O filtro organiza os chats; o uso da conta permanece geral.
+        </Typography.Text>
+      </Space>
+      <Tabs
+        activeKey={usageView}
+        onChange={setUsageView}
+        items={[
+          { key: 'visible', label: 'Em análise' },
+          { key: 'archived', label: 'Arquivados (' + archivedCount + ')' },
+        ]}
+      />
+      {actionError && (
+        <Alert
+          type="error"
+          showIcon
+          message={actionError}
+          closable
+          onClose={() => setActionError('')}
+        />
+      )}
       <Tabs
         activeKey={range}
         onChange={(value) => {
@@ -1020,7 +1128,8 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
             )}
             <Typography.Paragraph type="secondary" style={{ margin: '18px 0 0', fontSize: 12 }}>
               Comparação dos registros locais entre chats ativos e históricos. Não é uma divisão do
-              total da conta nem da cota.
+              total da conta nem da cota. O filtro de tipo e a aba de arquivados afetam somente os
+              registros locais dos chats.
             </Typography.Paragraph>
           </Card>
         </Col>
@@ -1031,10 +1140,12 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
           <Button
             size="small"
             disabled={!rows.length}
-            download={'tokens-chats-' + range + '.csv'}
+            download={'tokens-chats-' + range + '-' + projectType + '-' + usageView + '.csv'}
             href={csvLink(
               [
                 'Chat',
+                'Tipo de projeto',
+                'Organização',
                 accumulated ? 'Tokens acumulados locais' : 'Variações registradas',
                 'Início do período',
                 'Fim do período',
@@ -1044,6 +1155,8 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
               ],
               rows.map((row) => [
                 row.title,
+                categoryNames[row.category],
+                row.usageArchived ? 'Arquivado' : 'Em análise',
                 row.valueTokens,
                 accumulated ? '' : start,
                 accumulated ? '' : end,
@@ -1059,8 +1172,13 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
       >
         <Typography.Paragraph type="secondary">
           {accumulated
-            ? 'Último acumulado local por chat, incluindo Stand-by e acompanhamentos encerrados.'
+            ? 'Último acumulado local dos chats selecionados, incluindo Stand-by e acompanhamentos encerrados.'
             : 'Variações registradas nas datas selecionadas. Sem registro significa ausência de histórico, não consumo zero.'}
+        </Typography.Paragraph>
+        <Typography.Paragraph type="secondary">
+          Escolha o tipo de projeto em cada chat. Arquivar oculta o registro da análise principal,
+          preserva o histórico e mantém a coleta dos chats vinculados. Restaurar devolve o registro
+          à análise. Essa organização não altera o Kanban, Stand-by ou os cadastros do NocoBase.
         </Typography.Paragraph>
         {labelsFailed && (
           <Alert
@@ -1072,7 +1190,7 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
         )}
         <Table
           size="small"
-          scroll={{ x: 850 }}
+          scroll={{ x: 1100 }}
           pagination={{ pageSize: 10, showSizeChanger: false }}
           dataSource={rows}
           columns={[
@@ -1085,6 +1203,21 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
                   <Typography.Link href={'codex://threads/' + row.id}>{title}</Typography.Link>
                   {row.archived && <Tag>Acompanhamento encerrado</Tag>}
                 </Space>
+              ),
+            },
+            {
+              title: 'Tipo de projeto',
+              key: 'category',
+              width: 190,
+              render: (_, row) => (
+                <Select
+                  aria-label={'Tipo de projeto de ' + row.title}
+                  value={row.category}
+                  options={categoryOptions}
+                  style={{ width: 170 }}
+                  disabled={!!changing || !row.hasHistory || !data?.history?.confirmed}
+                  onChange={(category) => changePreferences(row, { category })}
+                />
               ),
             },
             {
@@ -1136,8 +1269,29 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
                 </Space>
               ),
             },
+            {
+              title: 'Organizar',
+              key: 'organize',
+              width: 130,
+              render: (_, row) => (
+                <Button
+                  size="small"
+                  loading={changing === row.id}
+                  disabled={!!changing || !row.hasHistory || !data?.history?.confirmed}
+                  onClick={() => changePreferences(row, { archived: !row.usageArchived })}
+                >
+                  {row.usageArchived ? 'Restaurar' : 'Arquivar'}
+                </Button>
+              ),
+            },
           ]}
-          locale={{ emptyText: busy ? 'Consultando…' : 'Nenhum consumo de chat disponível' }}
+          locale={{
+            emptyText: busy
+              ? 'Consultando…'
+              : usageView === 'archived'
+                ? 'Nenhum registro arquivado neste filtro'
+                : 'Nenhum registro neste filtro',
+          }}
         />
       </Card>
       <Collapse
@@ -1161,10 +1315,11 @@ function TokenAnalytics({ demo, refreshKey, bindingNames, loadNames }) {
                 <Typography.Text>
                   Hoje, 07 dias e 30 dias usam dias de calendário, incluindo hoje. Personalizado
                   inclui as duas datas. Dias ausentes não são zero; a média usa os dias da conta
-                  informados, preservando as datas fornecidas pelo Codex. O monitor conectado registra a cada minuto apenas ID, nome da tarefa
-                  fornecido pelo NocoBase, contadores, datas e lacunas; mantém esse histórico após
-                  remover o vínculo. Uma variação que atravessa a meia-noite fica sem data definida.
-                  A conta é consultada somente enquanto esta página estiver aberta.
+                  informados, preservando as datas fornecidas pelo Codex. O monitor conectado
+                  registra a cada minuto apenas ID, nome da tarefa fornecido pelo NocoBase,
+                  contadores, datas e lacunas; mantém esse histórico após remover o vínculo. Uma
+                  variação que atravessa a meia-noite fica sem data definida. A conta é consultada
+                  somente enquanto esta página estiver aberta.
                 </Typography.Text>
                 {data?.account?.at && (
                   <Typography.Text type="secondary">

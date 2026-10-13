@@ -7,6 +7,7 @@ export function calendarDate(at,timeZone){
   return ['year','month','day'].map(key=>parts.find(part=>part.type===key).value).join('-');
 }
 const count=value=>Number.isSafeInteger(value)&&value>=0;
+const categories=new Set(['unclassified','personal','professional']);
 const validDay=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value+'T00:00:00Z'))&&new Date(value+'T00:00:00Z').toISOString().slice(0,10)===value;
 
 // Private numeric history, independent of the active link registry. No Codex content.
@@ -27,7 +28,8 @@ export async function createTokenHistory({dataDir,timeZone=Intl.DateTimeFormat()
         if(!validDay(day.date)||dates.has(day.date)||!count(day.tokens)||typeof day.partial!=='boolean')throw new Error('invalid day');
         dates.add(day.date);return {date:day.date,tokens:day.tokens,partial:day.partial};
       }).sort((a,b)=>a.date.localeCompare(b.date));
-      threads[id.toLowerCase()]={sinceAt:row.sinceAt,lastAt:row.lastAt,lastTotal:row.lastTotal,unallocatedTokens:row.unallocatedTokens,daily,tracking:row.tracking===true,needsBaseline:row.needsBaseline===true,...(typeof row.title==='string'?{title:row.title.slice(0,512)}:{})};
+      if(row.category!==undefined&&!categories.has(row.category)||row.usageArchived!==undefined&&typeof row.usageArchived!=='boolean')throw new Error('invalid preferences');
+      threads[id.toLowerCase()]={sinceAt:row.sinceAt,lastAt:row.lastAt,lastTotal:row.lastTotal,unallocatedTokens:row.unallocatedTokens,daily,tracking:row.tracking===true,needsBaseline:row.needsBaseline===true,category:row.category||'unclassified',usageArchived:row.usageArchived===true,...(typeof row.title==='string'?{title:row.title.slice(0,512)}:{})};
     }
     state={version:1,timeZone:input.timeZone,threads};
   }catch(error){if(error.code!=='ENOENT')throw error;}
@@ -48,7 +50,7 @@ export async function createTokenHistory({dataDir,timeZone=Intl.DateTimeFormat()
         if(!UUID.test(input.id)||input.confirmed!==true||!count(input.totalTokens))continue;
         const id=input.id.toLowerCase(),old=next.threads[id];
         if(old&&at<=old.lastAt)continue;
-        const row=old||{sinceAt:at,lastAt:at,lastTotal:input.totalTokens,unallocatedTokens:0,daily:[],tracking:true,needsBaseline:false};
+        const row=old||{sinceAt:at,lastAt:at,lastTotal:input.totalTokens,unallocatedTokens:0,daily:[],tracking:true,needsBaseline:false,category:'unclassified',usageArchived:false};
         let day=row.daily.find(value=>value.date===today);
         if(!day){day={date:today,tokens:0,partial:!old};row.daily.push(day);}
         if(old){
@@ -79,6 +81,17 @@ export async function createTokenHistory({dataDir,timeZone=Intl.DateTimeFormat()
         if(allowed.includes(id)&&next.threads[id]&&next.threads[id].title!==title){next.threads[id].title=title;changed=true;}
       }
       if(changed)await commit(next);
+    });},
+    preferences(id,changes){return serial(async()=>{
+      if(typeof id!=='string'||!UUID.test(id)||!changes||typeof changes!=='object'||Array.isArray(changes))throw new Error('invalid preferences');
+      const keys=Object.keys(changes);
+      if(!keys.length||keys.some(key=>!['category','archived'].includes(key))||Object.hasOwn(changes,'category')&&!categories.has(changes.category)||Object.hasOwn(changes,'archived')&&typeof changes.archived!=='boolean')throw new Error('invalid preferences');
+      const key=id.toLowerCase();
+      if(!state.threads[key])return false;
+      const next=structuredClone(state),row=next.threads[key];
+      if(Object.hasOwn(changes,'category'))row.category=changes.category;
+      if(Object.hasOwn(changes,'archived'))row.usageArchived=changes.archived;
+      await commit(next);return true;
     });},
     sync(activeIds){return serial(async()=>{
       const allowed=new Set(activeIds),next=structuredClone(state);let changed=false;

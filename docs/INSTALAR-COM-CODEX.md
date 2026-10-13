@@ -355,3 +355,9 @@ Valide GET /tokens com a origem permitida: conta e metadados por chat devem ter 
 ### Tokens por período
 
 Em Uso do Codex, escolha Acumulado, Hoje, 07 dias, 30 dias ou Personalizado; no último caso, selecione as duas datas e clique em Aplicar período. O filtro atualiza conta, comparação e tabela por chat. Hoje/7/30 incluem o dia atual; o acumulado anterior ao início da coleta continua em Acumulado. O histórico dos chats começa na primeira leitura e registra apenas variações observadas enquanto o monitor está conectado, mesmo com a página fechada. Não é um relatório de cobrança. Pausas e viradas de dia podem deixar tokens sem data definida. Remover/trocar o link mantém o histórico antigo com indicação de acompanhamento encerrado. Dados privados ficam em data/token-history.json e não devem ser enviados ao GitHub. Não é necessário instalar extensão ou serviço adicional para este recurso.
+
+### Separar projetos pessoais e profissionais
+
+Em Uso do Codex → Tokens em perspectiva, use **Tipo de projeto** para selecionar Todos, Profissionais, Pessoais ou Não classificados. Na tabela, escolha a classificação de cada chat; registros existentes começam como Não classificado. A classificação pertence à visualização de consumo e não altera os cadastros do NocoBase. O filtro afeta a comparação entre chats, os totais locais, a tabela e seu CSV; o consumo geral e o gráfico diário da conta continuam globais.
+
+Use **Arquivar** na tabela para retirar um registro da aba Em análise. Ele ficará em **Arquivados**, com **Restaurar** para trazê-lo de volta. Arquivar não apaga o histórico, não remove o vínculo, não muda o Kanban/Stand-by e não interrompe a coleta dos chats vinculados. Tipo e arquivamento continuam salvos após reiniciar ou remover o vínculo. Nenhuma ação de exclusão foi adicionada. Essas preferências ficam somente no arquivo privado data/token-history.json.

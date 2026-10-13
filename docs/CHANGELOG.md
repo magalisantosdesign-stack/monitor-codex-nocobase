@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 0.10.0 — 2026-10-13
+
+- Filtros por tipo de projeto e classificação manual por chat, sem inferência.
+- Arquivar/Restaurar a análise de consumo preservando coleta, histórico, links e Kanban.
+- Preferências privadas persistentes, migração de histórico anterior e CSV do subconjunto exibido.
+
 ## 0.9.0 — 2026-10-13
 
 - Abas Acumulado, Hoje, 07 dias, 30 dias e Personalizado para conta e chats.

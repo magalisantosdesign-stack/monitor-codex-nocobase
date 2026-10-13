@@ -40,8 +40,29 @@ try{
  await history.capture([row(135)],time+60002);
  assert.equal(history.snapshot([id]).rows[0].daily[1].tokens,50,'Relinking never assigns paused usage to the current period');
  assert.equal(history.snapshot([id]).rows[0].unallocatedTokens,150);
+ // View preferences never change counters, links, tracking or daily history.
+ const original=history.snapshot([id]).rows[0];
+ assert.equal(original.category,'unclassified');assert.equal(original.usageArchived,false);
+ assert.equal(await history.preferences(id,{category:'personal',archived:true}),true);
+ let organized=history.snapshot([id]).rows[0];
+ assert.equal(organized.category,'personal');assert.equal(organized.usageArchived,true);
+ assert.deepEqual(organized.daily,original.daily);assert.equal(organized.lastTotal,original.lastTotal);assert.equal(organized.tracking,original.tracking);
+ await history.capture([row(145)],time+120002);
+ assert.equal(history.snapshot([id]).rows[0].daily[1].tokens,60,'Archive does not stop numeric collection');
+ history=await createTokenHistory({dataDir:root});
+ organized=history.snapshot([]).rows[0];assert.equal(organized.category,'personal');assert.equal(organized.usageArchived,true);assert.equal(organized.active,false);
+ await history.preferences(id,{archived:false});
+ assert.equal(history.snapshot([]).rows[0].category,'personal');assert.equal(history.snapshot([]).rows[0].usageArchived,false);
+ await assert.rejects(history.preferences(id,{category:'SECRET'}));await assert.rejects(history.preferences(id,{archived:'true'}));
+ await assert.rejects(history.preferences(id,{totalTokens:0}));await assert.rejects(history.preferences(id,{}));
+ assert.equal(await history.preferences(other,{category:'professional'}),false);assert.equal(history.snapshot([]).rows.length,1);
+ // Old numeric files migrate without assuming personal/professional categories.
+ const legacy=JSON.parse(await readFile(join(root,'token-history.json'),'utf8'));
+ delete legacy.threads[id].category;delete legacy.threads[id].usageArchived;
+ await writeFile(join(root,'token-history.json'),JSON.stringify(legacy));
+ history=await createTokenHistory({dataDir:root});assert.equal(history.snapshot([]).rows[0].category,'unclassified');assert.equal(history.snapshot([]).rows[0].usageArchived,false);
  const text=await readFile(join(root,'token-history.json'),'utf8');assert.ok(!text.includes('SECRET'));assert.ok(!text.includes('FORBIDDEN'));
  // Never overwrite an unreadable history to make the feature appear healthy.
  await writeFile(join(root,'token-history.json'),'{bad');await assert.rejects(createTokenHistory({dataDir:root}));assert.equal(await readFile(join(root,'token-history.json'),'utf8'),'{bad');
- console.log('PASS: calendar timezone, baseline, deltas, duplicate samples, unavailable reads, midnight gaps, counter resets, private labels, serialization, restart, retained unlinked history, background-only local reads and corrupt-file preservation.');
+ console.log('PASS: numeric history, calendar gaps, retained unlinked records, private labels, category/archive/restore persistence, legacy migration, continued collection while archived, validation and corrupt-file preservation.');
 }finally{assert.ok(resolve(root).startsWith(resolve(tmpdir())+sep));await rm(root,{recursive:true,force:true});}

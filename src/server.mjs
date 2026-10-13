@@ -172,6 +172,16 @@ const server=http.createServer(async(req,res)=>{
    await tokenHistory.labels(input.labels.map(row=>({id:row.id.toLowerCase(),title:row.title})),registry.ids);
    res.setHeader('Content-Type','application/json');res.end('{"ok":true}');return;
   }
+  if(req.url==='/token-preferences'&&req.method==='POST'){
+   if(!String(req.headers['content-type']||'').startsWith('application/json')){res.writeHead(415);res.end();return;}
+   let body='';for await(const chunk of req){body+=chunk;if(body.length>2048)throw new Error('too large');}
+   const input=JSON.parse(body);
+   if(!input||Object.keys(input).some(key=>!['instanceId','id','changes'].includes(key)))throw new Error('invalid preferences');
+   if(input.instanceId!==config.instanceId){res.writeHead(409);res.end('{"error":"instance mismatch"}');return;}
+   if(!tokenHistory){res.writeHead(503);res.end('{"error":"history unavailable"}');return;}
+   const found=await tokenHistory.preferences(input.id,input.changes);
+   res.setHeader('Content-Type','application/json');res.writeHead(found?200:404);res.end(found?'{"ok":true}':'{"error":"history not found"}');return;
+  }
   if(req.url==='/usage'&&req.method==='GET'){
    const result=await readUsage();res.setHeader('Content-Type','application/json');res.end(JSON.stringify({...result,instanceId:config.instanceId}));return;
   }
