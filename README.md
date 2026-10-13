@@ -14,6 +14,22 @@ O histórico por chat começa na primeira coleta, com indicação de lacunas qua
 
 O pacote começa **em demonstração, com seis cartões fictícios**. Nesse modo não lê cadastros, chama o coletor ou salva vínculos. Dados pessoais, conversas e configurações de conta não acompanham a distribuição. Este é um projeto independente, sem vínculo oficial com Codex ou NocoBase.
 
+## Veja o painel
+
+Capturas dos componentes reais em modo de demonstração e tema escuro. Todos os nomes, números, datas e vínculos mostrados são fictícios; as imagens não acessam contas nem cadastros pessoais. Clique em uma imagem para ampliá-la.
+
+### Kanban de acompanhamento
+
+Estados dos chats, contadores, vinculação e acesso ao Stand-by em uma única tela.
+
+![Kanban do Monitor Codex em tema escuro, com seis chats fictícios distribuídos por estado de execução.](docs/images/kanban-demo.png)
+
+### Consumo de tokens e filtros
+
+Exemplo de análise dos últimos 30 dias, com filtro por tipo de projeto, gráficos, tabela por chat, exportação CSV e acesso aos registros arquivados. O consumo geral da conta permanece separado dos registros locais dos chats.
+
+![Uso do Codex em demonstração, com filtro de projeto, período de 30 dias, gráficos de tokens, chats pessoais e profissionais e aba de arquivados.](docs/images/consumo-filtros-demo.png)
+
 ## Escolha como instalar
 
 Você pode escolher **um dos dois caminhos**. Ambos entregam o mesmo monitor e permitem usar a conexão com ou sem extensão.

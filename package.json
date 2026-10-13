@@ -89,6 +89,8 @@
     "tests/tokens-test.mjs",
     "tests/tokens-integration-test.mjs",
     "src/token-history.mjs",
-    "tests/token-history-test.mjs"
+    "tests/token-history-test.mjs",
+    "docs/images/kanban-demo.png",
+    "docs/images/consumo-filtros-demo.png"
   ]
 }
