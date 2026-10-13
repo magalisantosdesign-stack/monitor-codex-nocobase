@@ -1,6 +1,7 @@
 import {config} from './config.mjs';
 import {createUsageReader} from './usage.mjs';
 import {createTokenReader} from './tokens.mjs';
+import {createTokenHistory} from './token-history.mjs';
 import http from 'node:http';
 import {mkdir,readFile,writeFile,readdir,rename,unlink} from 'node:fs/promises';
 import {dirname,join} from 'node:path';
@@ -28,7 +29,12 @@ const readUsage=createUsageReader({bridges:async()=>{
  for(const id of [...registry.ids]){const value=await load(join('desktop-bridges',id+'.json'),null);if(value&&value.threadId===id)values.push(value);}
  return values;
 }});
-const readTokens=createTokenReader({codexHome:config.codexHome,executable:config.codexExecutable,ids:()=>registry.ids});
+let tokenHistory;
+try{tokenHistory=await createTokenHistory({dataDir:base});await tokenHistory.sync([]);await tokenHistory.sync(registry.ids);}catch{/* Preserve an unreadable history file; status monitoring remains available. */}
+const readTokens=createTokenReader({codexHome:config.codexHome,executable:config.codexExecutable,ids:()=>registry.ids,history:tokenHistory});
+// Only linked numeric metadata is sampled in the background, while this collector runs.
+const tokenTimer=setInterval(()=>void readTokens.sample().catch(()=>{}),60000);
+void readTokens.sample().catch(()=>{});
 let tail=Promise.resolve();
 function serial(fn){const result=tail.then(fn);tail=result.catch(()=>{});return result;}
 async function consume(){
@@ -113,6 +119,8 @@ const server=http.createServer(async(req,res)=>{
    if(!String(req.headers['content-type']||'').startsWith('application/json')){res.writeHead(415);res.end();return;}
    let body='';for await(const chunk of req){body+=chunk;if(body.length>150000)throw new Error('too large');}
    const input=JSON.parse(body);if(!Array.isArray(input.ids)||input.ids.length>2000||input.ids.some(id=>typeof id!=='string'||!UUID.test(id)))throw new Error('invalid ids');
+   if(input.labels!==undefined&&(!Array.isArray(input.labels)||input.labels.length>2000||input.labels.some(row=>!row||typeof row.id!=='string'||!UUID.test(row.id)||typeof row.title!=='string'||row.title.length>512)))throw new Error('invalid labels');
+   const changedLinks=registry.ids.join('|')!==[...new Set(input.ids.map(id=>id.toLowerCase()))].join('|');
    await serial(async()=>{registry={ids:[...new Set(input.ids.map(id=>id.toLowerCase()))]};await save('linked.json',registry);
     states=Object.fromEntries(Object.entries(states).filter(([id])=>registry.ids.includes(id)));
     standby=Object.fromEntries(Object.entries(standby).filter(([id])=>registry.ids.includes(id)));
@@ -121,6 +129,8 @@ const server=http.createServer(async(req,res)=>{
     for(const id of Object.keys(health))if(!registry.ids.includes(id)){delete health[id];retryRequested.delete(id);}
     if(diagnostics.lastBrowserPoll)diagnostics.lastBrowserPoll=null;
     await save('states.json',states);});
+   if(changedLinks)readTokens.invalidate();
+   try{await tokenHistory?.sync(registry.ids);await readTokens.sample();if(input.labels&&tokenHistory)await tokenHistory.labels(input.labels.map(row=>({id:row.id.toLowerCase(),title:row.title})),registry.ids);}catch{/* Link synchronization remains independent of history storage. */}
    res.setHeader('Content-Type','application/json');res.end('{"ok":true}');return;
   }
   if(req.url==='/recheck'&&req.method==='POST'){
@@ -153,6 +163,15 @@ const server=http.createServer(async(req,res)=>{
   if(req.url==='/tokens'&&req.method==='GET'){
    const result=await readTokens();res.setHeader('Content-Type','application/json');res.end(JSON.stringify({...result,instanceId:config.instanceId}));return;
   }
+  if(req.url==='/token-labels'&&req.method==='POST'){
+   if(!String(req.headers['content-type']||'').startsWith('application/json')){res.writeHead(415);res.end();return;}
+   let body='';for await(const chunk of req){body+=chunk;if(body.length>2000000)throw new Error('too large');}
+   const input=JSON.parse(body);
+   if(!Array.isArray(input.labels)||input.labels.length>2000||input.labels.some(row=>!row||typeof row.id!=='string'||!UUID.test(row.id)||typeof row.title!=='string'||row.title.length>512))throw new Error('invalid labels');
+   if(!tokenHistory){res.writeHead(503);res.end('{"error":"history unavailable"}');return;}
+   await tokenHistory.labels(input.labels.map(row=>({id:row.id.toLowerCase(),title:row.title})),registry.ids);
+   res.setHeader('Content-Type','application/json');res.end('{"ok":true}');return;
+  }
   if(req.url==='/usage'&&req.method==='GET'){
    const result=await readUsage();res.setHeader('Content-Type','application/json');res.end(JSON.stringify({...result,instanceId:config.instanceId}));return;
   }
@@ -170,8 +189,9 @@ const server=http.createServer(async(req,res)=>{
 });
 server.listen(port,'127.0.0.1',()=>process.stdout.write(`Codex monitor: http://127.0.0.1:${port}\n`));
 async function stop(){
- if(stopping)return;stopping=true;clearInterval(timer);clearInterval(runtimeTimer);
+ if(stopping)return;stopping=true;clearInterval(timer);clearInterval(runtimeTimer);clearInterval(tokenTimer);
  await readTokens.stop();
+ try{await tokenHistory?.sync([]);}catch{process.exitCode=1;}
  try{await serial(consume);}catch{process.exitCode=1;}
  const deadline=setTimeout(()=>{server.closeAllConnections();process.exit(process.exitCode||0);},5000);deadline.unref();
  server.close(async()=>{

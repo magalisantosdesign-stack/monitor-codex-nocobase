@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 0.9.0 — 2026-10-13
+
+- Abas Acumulado, Hoje, 07 dias, 30 dias e Personalizado para conta e chats.
+- Histórico numérico privado com baseline, variações diárias, lacunas, fuso e retenção após desvincular.
+- Coleta local por minuto enquanto conectado, sem serviço adicional; datas e cobertura explícitas nas exportações.
+
 ## 0.8.0 — 2026-10-09
 
 - Analytics na página Uso do Codex: resumo da conta, histórico diário, seleção de período, comparação e tabela de chats vinculados, com CSV.

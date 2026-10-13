@@ -19,9 +19,12 @@ try{
  assert.equal((await fetch(url+'/tokens',{headers:{Origin:'http://evil.example'}})).status,403);
  const response=await fetch(url+'/tokens',{headers});assert.equal(response.headers.get('cache-control'),'no-store');assert.equal(response.headers.get('access-control-allow-origin'),origin);
  const value=await response.json();assert.equal(value.scope,'tokens');assert.equal(value.account.confirmed,false);assert.equal(value.account.lifetimeTokens,null);assert.equal(value.threads.rows[0].totalTokens,765432);
- await fetch(url+'/linked',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({ids:[]})});assert.deepEqual((await (await fetch(url+'/tokens',{headers})).json()).threads.rows,[]);
+ assert.equal(value.history.rows[0].daily[0].tokens,0);
+ await fetch(url+'/token-labels',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({labels:[{id,title:'Tarefa fictícia'}]})});
+ assert.equal((await fetch(url+'/token-labels',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({labels:[{id,title:123}]})})).status,400);
+ await fetch(url+'/linked',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({ids:[]})});assert.deepEqual((await (await fetch(url+'/tokens',{headers})).json()).threads.rows,[]);const retained=await (await fetch(url+'/tokens',{headers})).json();assert.equal(retained.history.rows[0].active,false);assert.equal(retained.history.rows[0].title,'Tarefa fictícia');
  const shutdown=await fetch(url+'/shutdown',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({instanceId:value.instanceId})});assert.equal(shutdown.status,200);await exited;child=null;
- assert.ok(!(await readdir(base)).some(name=>/tokens|usage/.test(name)),'No token report persisted');
+ const history=JSON.parse(await readFile(join(base,'token-history.json'),'utf8'));assert.equal(history.threads[id].lastTotal,765432);assert.equal(history.threads[id].title,'Tarefa fictícia');
  const check=new DatabaseSync(join(base,'state_5.sqlite'),{readOnly:true});assert.equal(check.prepare('SELECT tokens_used FROM threads WHERE id=?').get(id).tokens_used,765432);check.close();
  console.log('PASS: HTTP tokens CORS, no-store, unavailable account vs local tokens, immediate unlink pruning, database unchanged and shutdown.');
 }finally{if(child){child.kill();await exited;}assert.ok(resolve(base).startsWith(resolve(tmpdir())+sep));await rm(base,{recursive:true,force:true});}

@@ -77,21 +77,37 @@ export async function readLinkedTokens({codexHome,ids}){
  }finally{db.close();}
 }
 
-export function createTokenReader({codexHome,executable,ids,accountRead=queryAccountTokens,linkedRead=readLinkedTokens,now=Date.now,cacheMs=60000}){
+export function createTokenReader({codexHome,executable,ids,history,accountRead=queryAccountTokens,linkedRead=readLinkedTokens,now=Date.now,cacheMs=60000}){
  const controller=new AbortController();let lastAttempt=0,cached=null,inFlight=null,stopped=false;
+ let local=null,localAt=0,localFlight=null,historyFailed=false;
+ async function sample(){
+  if(stopped)throw new Error('stopped');
+  if(local&&now()-localAt<cacheMs)return local;
+  if(!localFlight)localFlight=(async()=>{
+   try{
+    const rows=await linkedRead({codexHome,ids:[...ids()]}),at=now(),allowed=new Set(ids());
+    local={source:'codex-local-metadata',confirmed:true,at,rows:rows.filter(row=>allowed.has(row.id))};localAt=at;
+    if(history)try{await history.capture(local.rows,at);historyFailed=false;}catch{historyFailed=true;}
+   }catch{local={...(local||{source:'codex-local-metadata',rows:[]}),confirmed:false};localAt=now();}
+   return local;
+  })().finally(()=>{localFlight=null;});
+  return localFlight;
+ }
  async function refresh(){
-  const selected=[...ids()];
-  const [account,threads]=await Promise.allSettled([accountRead({codexHome,executable,signal:controller.signal}),linkedRead({codexHome,ids:selected})]);
+  const [account,threads]=await Promise.allSettled([accountRead({codexHome,executable,signal:controller.signal}),sample()]);
   const at=now();lastAttempt=at;
   cached={service:'codex-monitor',scope:'tokens',at,
    account:account.status==='fulfilled'&&account.value?{...account.value,confirmed:true,at}:{...(cached?.account||{lifetimeTokens:null,daily:[]}),confirmed:false},
-   threads:threads.status==='fulfilled'?{source:'codex-local-metadata',confirmed:true,at,rows:threads.value}:{...(cached?.threads||{source:'codex-local-metadata',rows:[]}),confirmed:false}};
+   threads:threads.status==='fulfilled'?threads.value:{...(cached?.threads||{source:'codex-local-metadata',rows:[]}),confirmed:false}};
  }
  const read=async()=>{
   if(stopped)throw new Error('stopped');
   if(!cached||now()-lastAttempt>=cacheMs){if(!inFlight)inFlight=refresh().finally(()=>{inFlight=null;});await inFlight;}
-  const allowed=new Set(ids());return {...cached,threads:{...cached.threads,rows:cached.threads.rows.filter(row=>allowed.has(row.id))}};
+  const allowed=new Set(ids()),threads=local||cached.threads;
+  return {...cached,threads:{...threads,rows:threads.rows.filter(row=>allowed.has(row.id))},history:history?{...history.snapshot([...allowed]),confirmed:!historyFailed}:{confirmed:false,rows:[]}};
  };
- read.stop=async()=>{stopped=true;controller.abort();await inFlight;};
+ read.sample=sample;
+ read.invalidate=()=>{localAt=0;};
+ read.stop=async()=>{stopped=true;controller.abort();await Promise.allSettled([inFlight,localFlight]);await history?.flush();};
  return read;
 }

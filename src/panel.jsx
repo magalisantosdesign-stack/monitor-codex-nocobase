@@ -78,7 +78,7 @@ function Monitor(){
   try{
    const groups=await Promise.all(MONITOR_CONFIG.sources.map(records));
    const rows=groups.flat();bindingsRef.current=rows;if(mounted.current){setBindings(rows);setError('');}
-   try{await local('/linked',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:[...new Set(rows.filter(r=>r.chat).map(r=>r.chat))]})});}
+   try{await local('/linked',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:[...new Set(rows.filter(r=>r.chat).map(r=>r.chat))],labels:[...new Set(rows.filter(r=>r.chat).map(r=>r.chat))].map(id=>({id,title:[...new Set(rows.filter(r=>r.chat===id).map(r=>r.title))].join(' · ').slice(0,512)}))})});}
    catch{if(mounted.current)setOnline(false);}
    await poll();
   }catch{if(mounted.current)setError('Não foi possível carregar os vínculos. Atualize a página ou confira seu acesso aos projetos e tarefas.');}
