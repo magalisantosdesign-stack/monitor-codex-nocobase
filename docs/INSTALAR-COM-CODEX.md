@@ -162,15 +162,22 @@ prepare o bloco e guie a inclusão pela interface; registre essa etapa como
 pendente até verificar sua realização. Não invente comandos de CLI nem grave
 esquemas por SQL para contornar ausência de ferramenta.
 
-Leia somente o esquema necessário das coleções que armazenam as tarefas e
-projetos. Verifique chave primária, título, situação, link do Codex e relação
-de setor quando existir. Os nomes `projetos`, `demandas`, `nome`, `titulo`,
-`linkCodex`, `subarea` e `situacao` do exemplo não são nomes universais.
+Prepare o cadastro básico incluído em `config/nocobase-tasks.json`, conforme
+`docs/CADASTRO-TAREFAS.md`: coleção geral `codex_monitor_tasks`, campos `title`,
+`project` e `linkCodex`. Em uma instalação nova, este é o caminho padrão e não
+depende de o usuário criar previamente tarefas ou uma página de cadastro.
+Use a superfície oficial de modelagem: consulte a ajuda de `collections get`
+e `collections apply`, confira o esquema antes de aplicar e use o JSON como
+`--body-file`. Nunca envie `replaceFields` nem substitua uma coleção existente.
+Se já existir, reutilize somente após conferir campos, tipos, chave primária e
+validação; diante de incompatibilidade, explique a diferença e resolva o nome
+com o usuário. Não execute o apply inteiro sobre um modelo preexistente.
 
-Se faltar apenas um campo de vínculo, explique e crie um campo compatível de
-texto/URL na coleção escolhida pela rota oficial; não substitua campos ou dados.
-Se não existirem cadastros de tarefas/projetos, pergunte onde o usuário quer
-cadastrá-los antes de criar um modelo. Não copie a estrutura pessoal do autor.
+Se o usuário escolher integrar cadastros que já possui, leia somente o esquema
+necessário: chave primária, título, situação, campo de vínculo e relações de
+setor. Os nomes não são universais. Configure `sources` e `taskCreation: false`
+para usar os formulários existentes; pode manter o cadastro básico junto com
+essas fontes se o usuário quiser. Não copie a estrutura pessoal do autor.
 
 Prepare uma página **Monitor Codex**, evitando duplicar outra já existente.
 Crie um bloco JavaScript/RunJS compatível com `ctx.libs.React`, `ctx.libs.antd`
@@ -180,11 +187,16 @@ a renderização e configure a cópia do bloco para uso real:
 - `demo: false`;
 - `endpoint`: loopback e porta configurada;
 - `sources`: coleções confirmadas, com `label`, `idField`, `titleField`,
-  `linkField`, `statusField` e, quando existirem, `sectorPath` e `appends`.
+  `linkField` e, quando existirem, `statusField`, `sectorPath` e `appends`;
+- `taskCreation`: configuração básica incluída, ou `false` para cadastro externo.
 
-Use os dados cadastrados pelo próprio usuário. O monitor vincula um chat a uma
-tarefa/projeto já cadastrado; ele não precisa de uma lista nova de acompanhamentos.
-Verifique leitura das coleções e edição do campo de link com a conta usada.
+Use os dados cadastrados pelo próprio usuário. Verifique **Nova tarefa** com
+nome obrigatório, projeto opcional e link opcional. Sem link, deve continuar
+na lista de seleção após atualizar e reabrir a página; com link válido, deve
+entrar no Kanban e na leitura de consumo. Link inválido não pode criar registro.
+Verifique criação/leitura da coleção básica e edição do link com a conta usada.
+Um cadastro salvo com o coletor desligado deve continuar salvo e disponível.
+Não declare criação real validada apenas com demonstração ou teste simulado.
 Não amplie permissões globais para resolver acesso negado.
 
 No mesmo grupo do menu esquerdo, prepare também **Uso do Codex**, abaixo de

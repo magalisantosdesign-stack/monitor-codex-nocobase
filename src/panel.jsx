@@ -8,9 +8,10 @@ const MONITOR_CONFIG = {
  reconnectUri: 'codex-monitor://reconnect',
  pollMs: 3000,
  linksPollMs: 30000,
+ // Cadastro básico preparado na instalação. Use false para usar somente cadastros externos.
+ taskCreation: {collection:'codex_monitor_tasks',titleField:'title',projectField:'project',linkField:'linkCodex'},
  sources: [
-  {collection:'projetos',label:'Projeto',idField:'id',titleField:'nome',linkField:'linkCodex',sectorPath:'subarea.nome',statusField:'situacao',appends:['subarea']},
-  {collection:'demandas',label:'Tarefa',idField:'id',titleField:'titulo',linkField:'linkCodex',sectorPath:'subarea.nome',statusField:'situacao',appends:['subarea']},
+  {collection:'codex_monitor_tasks',label:'Tarefa',idField:'id',titleField:'title',linkField:'linkCodex',sectorPath:'project',appends:[]},
  ],
 };
 const endpoint=MONITOR_CONFIG.endpoint.replace(/\/$/,'');
@@ -55,6 +56,34 @@ function Monitor(){
  const reconnectTimer=React.useRef(null);
  const [disconnecting,setDisconnecting]=React.useState(false);
  const paused=React.useRef(false),connectionEpoch=React.useRef(0),collectorInstance=React.useRef('');
+ const [taskForm,setTaskForm]=React.useState(false),[taskTitle,setTaskTitle]=React.useState(''),[taskProject,setTaskProject]=React.useState(''),[taskLink,setTaskLink]=React.useState('');
+ const [creatingTask,setCreatingTask]=React.useState(false),[taskError,setTaskError]=React.useState(''),[taskNotice,setTaskNotice]=React.useState('');
+ const creationPending=React.useRef(false);
+ const creation=MONITOR_CONFIG.taskCreation;
+ const creationSource=creation&&MONITOR_CONFIG.sources.find(source=>source.collection===creation.collection&&source.titleField===creation.titleField&&source.linkField===creation.linkField);
+ function openTask(){if(creationPending.current)return;setTaskError('');setTaskForm(true);}
+ function cancelTask(){if(creationPending.current)return;setTaskForm(false);setTaskError('');}
+ async function createTask(){
+  if(MONITOR_CONFIG.demo||creationPending.current)return;
+  if(!creationSource){setTaskError('O cadastro básico não está configurado nas fontes do monitor. Consulte docs/CADASTRO-TAREFAS.md.');return;}
+  const title=taskTitle.trim(),project=taskProject.trim(),enteredLink=taskLink.trim(),id=enteredLink?chatId(enteredLink):null;
+  if(!title||title.length>200){setTaskError('Informe um nome de tarefa com até 200 caracteres.');return;}
+  if(project.length>120){setTaskError('O nome do projeto deve ter até 120 caracteres.');return;}
+  if(enteredLink&&!id){setTaskError('Informe um link codex://threads/ID ou o ID local do chat. Você também pode deixar o link vazio.');return;}
+  creationPending.current=true;setCreatingTask(true);setTaskError('');
+  try{
+   const resource=ctx.makeResource('MultiRecordResource');resource.setResourceName(creation.collection);
+   const values={[creation.titleField]:title,[creation.linkField]:id?'codex://threads/'+id:''};
+   if(creation.projectField)values[creation.projectField]=project;
+   await resource.create(values,{refresh:false});
+  }catch{
+   if(mounted.current)setTaskError('Não foi possível confirmar o cadastro. Confira a coleção codex_monitor_tasks e a permissão de criação. Se a conexão caiu durante o envio, clique em Atualizar e procure a tarefa antes de tentar novamente.');
+   creationPending.current=false;if(mounted.current)setCreatingTask(false);return;
+  }
+  // The NocoBase save is confirmed independently of the local collector/reload.
+  if(mounted.current){setTaskForm(false);setTaskTitle('');setTaskProject('');setTaskLink('');setTaskNotice(id?'Tarefa cadastrada com o chat vinculado. Os estados serão confirmados quando o coletor estiver conectado.':'Tarefa cadastrada. Escolha seu nome em Vincular um chat quando quiser acompanhá-la.');}
+  try{await reload();}finally{creationPending.current=false;if(mounted.current)setCreatingTask(false);}
+ }
  async function local(path,options={}){
   const response=await window.fetch(endpoint+path,{...options,signal:window.AbortSignal.timeout(3500)});
   if(!response.ok)throw new Error('Coletor local indisponível');return response.json();
@@ -81,7 +110,7 @@ function Monitor(){
    try{await local('/linked',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:[...new Set(rows.filter(r=>r.chat).map(r=>r.chat))],labels:[...new Set(rows.filter(r=>r.chat).map(r=>r.chat))].map(id=>({id,title:[...new Set(rows.filter(r=>r.chat===id).map(r=>r.title))].join(' · ').slice(0,512)}))})});}
    catch{if(mounted.current)setOnline(false);}
    await poll();
-  }catch{if(mounted.current)setError('Não foi possível carregar os vínculos. Atualize a página ou confira seu acesso aos projetos e tarefas.');}
+  }catch{if(mounted.current)setError('Não foi possível carregar os vínculos. Confira seu acesso e se as coleções configuradas existem. Na instalação básica, prepare codex_monitor_tasks conforme docs/CADASTRO-TAREFAS.md.');}
  }
  async function refresh(){
   if(disconnecting||reconnecting)return;
@@ -218,7 +247,20 @@ function Monitor(){
   {!online&&<Alert type="warning" showIcon message={reconnecting?'Conectando monitor…':'Coletor local desconectado'} description={reconnectError||'Com extensão, clique em Conectar monitor. Sem extensão, abra Iniciar-Monitor.cmd e clique em Atualizar. Após conectar, os estados atualizam automaticamente.'}/>}
   {online&&unconfirmed.length>0&&<Alert type="warning" showIcon message={unconfirmed.length+' chat(s) com estado não confirmado'} description="O monitor continua tentando automaticamente. Os cartões preservam o último estado observado e voltarão à coluna correta quando houver confirmação."/>}
   <Row gutter={[16,16]}>{['processando','aguardando_aprovacao','aguardando_resposta','respondido'].map(status=><Col xs={24} sm={12} xl={6} key={status}><Card><Statistic title={statusNames[status]} value={chats.filter(r=>r.status===status).length}/></Card></Col>)}</Row>
-  <Card title="Vincular um chat">
+  <Card title="Vincular um chat" extra={creationSource&&<Button onClick={openTask} disabled={creatingTask}>Nova tarefa</Button>}>
+   {taskNotice&&<Alert type="success" showIcon message={taskNotice} closable onClose={()=>setTaskNotice('')} style={{marginBottom:16}}/>}
+   {bindings.length===0&&!error&&<Typography.Paragraph type="secondary">{creationSource?'Comece pelo botão Nova tarefa. Depois, selecione o cadastro abaixo e informe o link do chat.':'Cadastre uma tarefa ou projeto no seu formulário do NocoBase e clique em Atualizar para selecioná-lo aqui.'}</Typography.Paragraph>}
+   {taskForm&&<Card size="small" title="Nova tarefa" style={{marginBottom:16}}>
+    <Space direction="vertical" size={12} style={{width:'100%'}}>
+     <label style={{width:'100%'}}>Nome da tarefa *<Input aria-label="Nome da tarefa" value={taskTitle} maxLength={200} onChange={event=>setTaskTitle(event.target.value)} disabled={creatingTask} placeholder="Ex.: Revisar apresentação"/></label>
+     <label style={{width:'100%'}}>Projeto (opcional)<Input aria-label="Projeto da tarefa" value={taskProject} maxLength={120} onChange={event=>setTaskProject(event.target.value)} disabled={creatingTask} placeholder="Ex.: Site institucional"/></label>
+     <label style={{width:'100%'}}>Link do chat (opcional)<Input aria-label="Link do chat da nova tarefa" value={taskLink} onChange={event=>setTaskLink(event.target.value)} disabled={creatingTask} placeholder="codex://threads/… ou ID do chat"/></label>
+     <Typography.Text type="secondary">Com link, a tarefa entra no acompanhamento. Sem link, fica salva na lista para vincular depois.</Typography.Text>
+     {MONITOR_CONFIG.demo&&<Alert type="info" showIcon message="Demonstração: nenhum cadastro será gravado."/>}
+     {taskError&&<Alert type="error" showIcon message={taskError}/>}
+     <Space wrap><Button type="primary" disabled={MONITOR_CONFIG.demo} loading={creatingTask} onClick={createTask}>Cadastrar tarefa</Button><Button disabled={creatingTask} onClick={cancelTask}>Cancelar</Button></Space>
+    </Space>
+   </Card>}
    <Space wrap><Select showSearch optionFilterProp="label" placeholder="Escolha uma tarefa ou projeto" value={selected} onChange={setSelected} style={{minWidth:300}} options={bindings.map(r=>({value:r.key,label:(r.label+': ')+r.title+' · '+r.sector}))}/><Input placeholder="codex://threads/… ou ID do chat" value={link} onChange={e=>setLink(e.target.value)} style={{width:340}}/><Button type="primary" disabled={MONITOR_CONFIG.demo} loading={busy} onClick={bind}>Vincular</Button></Space>
    <Typography.Paragraph type="secondary" style={{marginTop:12,marginBottom:0}}>Cada tarefa ou projeto acompanha um chat. Vincular outro chat substitui o vínculo anterior.</Typography.Paragraph>
   </Card>

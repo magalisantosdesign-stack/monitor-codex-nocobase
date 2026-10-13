@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 0.11.0 — 2026-10-13
+
+- Cadastro básico de tarefas no Monitor, com nome obrigatório, projeto e link opcionais.
+- Modelo vazio de coleção incluído e fontes padrão alinhadas nos dois painéis.
+- Instalação via Codex e manual contemplam criação do modelo, permissões e testes de persistência; integração com coleções existentes permanece disponível.
+
 ## 0.10.0 — 2026-10-13
 
 - Filtros por tipo de projeto e classificação manual por chat, sem inferência.

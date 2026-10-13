@@ -23,8 +23,7 @@ const USAGE_CONFIG = {
   demo: true,
   endpoint: 'http://127.0.0.1:13011',
   sources: [
-    { collection: 'projetos', label: 'Projeto', titleField: 'nome', linkField: 'linkCodex' },
-    { collection: 'demandas', label: 'Tarefa', titleField: 'titulo', linkField: 'linkCodex' },
+    { collection: 'codex_monitor_tasks', label: 'Tarefa', titleField: 'title', linkField: 'linkCodex' },
   ],
 };
 const endpoint = USAGE_CONFIG.endpoint;

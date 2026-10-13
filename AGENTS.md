@@ -1,5 +1,11 @@
 # Monitor Codex — distribuição
 
+## Cadastro básico incluído
+
+Instalações novas usam config/nocobase-tasks.json: coleção geral codex_monitor_tasks, id automático, title obrigatório, project e linkCodex opcionais. Preparar pela modelagem oficial no ambiente escolhido, verificando existência/compatibilidade primeiro; nunca aplicar o payload inteiro sobre modelo preexistente, usar replaceFields, copiar cadastros pessoais ou ampliar ACL global. Preparar distribuição não autoriza instalar o modelo no ambiente pessoal de origem. sources dos dois painéis devem ficar alinhadas. Nova tarefa cria somente na coleção básica configurada em taskCreation e presente nas sources; taskCreation:false preserva o cadastro pelos formulários externos. Não direcionar o formulário simples a coleções com outros campos obrigatórios sem adaptação/validação.
+
+Nova tarefa exige nome de até 200 caracteres, projeto opcional até 120 e link local válido ou vazio; validar antes de criar, impedir duplo envio e preservar campos em falha. Salvar usando MultiRecordResource.create pelo acesso autorizado do NocoBase; não escrever cadastros no coletor. Sem link, registro continua na lista de seleção depois de reabrir; com link, entra no acompanhamento e no consumo. Cadastro confirmado independe de coletor online ou sucesso de recarga posterior. Falha de transporte durante create não comprova que o servidor não gravou; orientar procurar o cadastro antes de repetir. Demo permite abrir o formulário, mas nunca criar, ler cadastros ou fazer rede. Não alterar negócio, links existentes ou histórico ao criar tarefa. Testar tests/task-registration-test.mjs, conexão existente e demo; distinguir simulação de teste real no NocoBase.
+
 - Esta pasta é uma cópia independente. Não alterar nem instalar nada no ambiente de origem ao preparar ou testar a distribuição.
 - Não copiar dados reais, configurações locais, backups, logs, capturas, credenciais ou histórico Git. Usar exclusivamente IDs fictícios `00000000-0000-4000-8000-...` nos exemplos e testes.
 - `src/panel.jsx` inicia em modo de demonstração sem rede, sem leitura de cadastros e sem gravação. Dados reais exigem `demo: false` e fontes configuradas pelo usuário.

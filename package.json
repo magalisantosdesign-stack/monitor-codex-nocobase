@@ -1,6 +1,6 @@
 {
   "name": "monitor-codex-nocobase",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "private": true,
   "license": "MIT",
   "description": "Monitor local de chats vinculados ao NocoBase, com Kanban e demonstração fictícia.",
@@ -11,7 +11,7 @@
   "scripts": {
     "start": "node scripts/Iniciar-Monitor.mjs",
     "server": "node src/server.mjs",
-    "test": "node tests/token-history-test.mjs && node tests/tokens-test.mjs && node tests/tokens-integration-test.mjs && node tests/usage-test.mjs && node tests/usage-integration-test.mjs && node tests/health-test.mjs && node tests/health-integration-test.mjs && node tests/checkpoint-test.mjs && node tests/checkpoint-integration-test.mjs && node tests/runtime-test.mjs && node tests/runtime-integration-test.mjs && node tests/test.mjs && node tests/config-test.mjs && node tests/startup-test.mjs && node tests/reconnect-test.mjs && node tests/standby-test.mjs && node tests/standby-integration-test.mjs && node tests/lifecycle-test.mjs && node tests/native-bridge-test.mjs && node tests/browser-test.mjs && node tests/panel-connection-test.mjs && node tests/integration-test.mjs && node scripts/check-distribution.mjs",
+    "test": "node tests/task-registration-test.mjs && node tests/token-history-test.mjs && node tests/tokens-test.mjs && node tests/tokens-integration-test.mjs && node tests/usage-test.mjs && node tests/usage-integration-test.mjs && node tests/health-test.mjs && node tests/health-integration-test.mjs && node tests/checkpoint-test.mjs && node tests/checkpoint-integration-test.mjs && node tests/runtime-test.mjs && node tests/runtime-integration-test.mjs && node tests/test.mjs && node tests/config-test.mjs && node tests/startup-test.mjs && node tests/reconnect-test.mjs && node tests/standby-test.mjs && node tests/standby-integration-test.mjs && node tests/lifecycle-test.mjs && node tests/native-bridge-test.mjs && node tests/browser-test.mjs && node tests/panel-connection-test.mjs && node tests/integration-test.mjs && node scripts/check-distribution.mjs",
     "check:distribution": "node scripts/check-distribution.mjs",
     "hooks:plan": "node scripts/Install-Hooks.mjs",
     "hooks:install": "node scripts/Install-Hooks.mjs --apply",
@@ -91,6 +91,9 @@
     "src/token-history.mjs",
     "tests/token-history-test.mjs",
     "docs/images/kanban-demo.png",
-    "docs/images/consumo-filtros-demo.png"
+    "docs/images/consumo-filtros-demo.png",
+    "config/nocobase-tasks.json",
+    "docs/CADASTRO-TAREFAS.md",
+    "tests/task-registration-test.mjs"
   ]
 }

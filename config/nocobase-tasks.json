@@ -1,0 +1,29 @@
+{
+  "name": "codex_monitor_tasks",
+  "title": "Tarefas do Monitor Codex",
+  "template": "general",
+  "fields": [
+    {
+      "name": "title",
+      "title": "Nome da tarefa",
+      "interface": "input",
+      "validation": {
+        "type": "string",
+        "rules": [
+          {"key": "required", "name": "required"},
+          {"key": "max", "name": "max", "args": {"limit": 200}}
+        ]
+      }
+    },
+    {
+      "name": "project",
+      "title": "Projeto",
+      "interface": "input"
+    },
+    {
+      "name": "linkCodex",
+      "title": "Link do chat Codex",
+      "interface": "input"
+    }
+  ]
+}

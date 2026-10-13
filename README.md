@@ -2,6 +2,8 @@
 
 Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processando**, **Aguardando aprovação**, **Aguardando resposta**, **Respondido**, **Interrompido**, **Sem sinal** e **Estado não confirmado**. Oferece Stand-by, atualização automática e suporte aos temas claro e escuro. O estado do chat é independente da situação da tarefa ou projeto.
 
+Inclui **Nova tarefa** no próprio monitor e um modelo de cadastro básico para instalações novas. Você pode cadastrar a tarefa junto com o link do chat ou vincular depois. Também pode integrar coleções que já utiliza no NocoBase.
+
 A página **Uso do Codex** reúne:
 
 - **Consumo e limites da conta:** cota disponível, próxima renovação e redefinições disponíveis com suas datas de validade.
@@ -116,21 +118,24 @@ Se necessário, configure `codexHome` para a pasta Codex da conta. Sem essa opç
 
 ### 2. Preparar o painel
 
-Crie uma página com um bloco JavaScript no NocoBase e cole `src/panel.jsx`. Mantenha `demo: true` para experimentar os seis cartões fictícios, sem acesso à rede ou aos cadastros.
+Prepare o [cadastro básico de tarefas](docs/CADASTRO-TAREFAS.md) com o modelo `config/nocobase-tasks.json`. Ele cria uma coleção vazia, sem dados de exemplo ou cadastros pessoais. Não é preciso criar uma página separada de tarefas: o formulário **Nova tarefa** fica no monitor. Se preferir aproveitar suas coleções existentes, siga a alternativa no mesmo guia.
+
+Crie uma página com um bloco JavaScript no NocoBase e cole `src/panel.jsx`. Mantenha `demo: true` para experimentar os seis cartões fictícios e abrir o formulário, sem acesso à rede ou gravação.
 
 Para uso real, ajuste `MONITOR_CONFIG` no início do bloco:
 
 - `demo: false`.
 - `endpoint`: endereço local e porta do coletor, normalmente `http://127.0.0.1:13011`.
-- `sources`: suas coleções e respectivos campos; os nomes fornecidos são apenas exemplos.
+- `sources`: mantenha a coleção básica `codex_monitor_tasks` ou configure suas coleções e respectivos campos.
+- `taskCreation`: mantenha o cadastro básico para habilitar **Nova tarefa**; use `false` se preferir cadastrar somente nos formulários que já possui.
 - `idField`, `titleField` e `linkField`: chave primária, título e campo de texto/URL usado para guardar `codex://threads/ID`.
 - `sectorPath` e `appends`: caminho do setor e relações necessárias para lê-lo.
 - `statusField`: situação de negócio, que o monitor não modifica.
 - `label`: tipo de cadastro exibido no cartão.
 
-O painel depende das bibliotecas do NocoBase; não é uma página HTML independente. Sua conta precisa poder ler as coleções e editar o campo de vínculo.
+O painel depende das bibliotecas do NocoBase; não é uma página HTML independente. Sua conta precisa poder ler as coleções, editar o campo de vínculo e criar registros na coleção básica para usar **Nova tarefa**.
 
-Para incluir a página, crie um item **Uso do Codex** no mesmo grupo do menu esquerdo, abaixo de **Monitor Codex**, adicione um bloco JavaScript/RunJS e use `src/panel-usage.jsx`. Configure `USAGE_CONFIG` na sua cópia: `demo: false` e o `endpoint` do seu coletor. Configure também `sources` com as mesmas coleções e campos `titleField`/`linkField` usados no Monitor, para identificar os chats na tabela. Não é necessário criar coleções ou cadastrar a conta.
+Para incluir a página, crie um item **Uso do Codex** no mesmo grupo do menu esquerdo, abaixo de **Monitor Codex**, adicione um bloco JavaScript/RunJS e use `src/panel-usage.jsx`. Configure `USAGE_CONFIG` na sua cópia: `demo: false` e o `endpoint` do seu coletor. Mantenha a mesma coleção básica ou alinhe `sources` com as coleções e campos `titleField`/`linkField` usados no Monitor. Essa página não exige outra coleção nem cadastro da conta.
 
 ### 3. Instalar e confiar nos hooks
 
@@ -187,7 +192,14 @@ Se Node ou a pasta instalada mudar, refaça a ponte. Antes de mover a pasta, rem
 
 </details>
 
-## Vínculos e Stand-by
+## Cadastrar tarefas, vincular chats e usar Stand-by
+
+1. No **Monitor Codex**, clique em **Nova tarefa**, ao lado de **Vincular um chat**.
+2. Informe o nome da tarefa. O nome do projeto é opcional e serve para identificar o cartão.
+3. Se já tiver o ID local ou link `codex://threads/ID`, informe-o no formulário.
+4. Clique em **Cadastrar tarefa**. Com link, o cartão entra no acompanhamento; sem link, a tarefa fica salva na lista **Escolha uma tarefa ou projeto** para vincular depois.
+
+O cadastro é salvo no NocoBase, inclusive com o coletor desligado. Os estados precisam do coletor conectado. Na demonstração, o formulário pode ser aberto, mas a gravação fica desabilitada. Se usa apenas coleções externas com `taskCreation: false`, cadastre nos seus formulários habituais antes de vincular.
 
 Em **Vincular um chat**, escolha a tarefa ou projeto e informe o ID local ou `codex://threads/ID`. Links de compartilhamento não identificam o chat local. Vários cadastros podem acompanhar o mesmo chat.
 
