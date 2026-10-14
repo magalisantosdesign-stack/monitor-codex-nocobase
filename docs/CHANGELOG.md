@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## 0.12.0 — 2026-10-14
+
+- Página Tarefas com Kanban por situação de negócio, busca, filtro por projeto e edição em painel lateral.
+- Menu na ordem Tarefas → Monitor Codex → Uso do Codex.
+- Cadastrar nova tarefa no Monitor abre cadastro lateral na mesma coleção.
+- Situação da tarefa independente da execução do chat; concluir preserva vínculo e consumo.
+- Migração de instalação anterior adiciona somente status, preservando registros.
+
 ## 0.11.0 — 2026-10-13
 
 - Cadastro básico de tarefas no Monitor, com nome obrigatório, projeto e link opcionais.

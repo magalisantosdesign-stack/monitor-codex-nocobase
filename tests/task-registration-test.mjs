@@ -54,7 +54,7 @@ function harness({demo=false,offline=false,readError=false,createError=false}={}
 test('Empty install: create without a chat, reopen, select and link the saved task',async()=>{
  const h=harness();await h.render().reload();assert.equal(h.render().bindings.length,0);
  await h.fill({title:' Tarefa fictícia ',project:' Projeto de exemplo '}).createTask();
- assert.deepEqual(h.stored,[{id:1,title:'Tarefa fictícia',project:'Projeto de exemplo',linkCodex:''}]);
+ assert.deepEqual(h.stored,[{id:1,title:'Tarefa fictícia',project:'Projeto de exemplo',linkCodex:'',status:'nao_iniciado'}]);
  assert.equal(h.render().taskForm,false);assert.equal(h.render().taskTitle,'');
  await h.render().reload();let panel=h.render();assert.equal(panel.bindings.length,1);
  assert.equal(panel.bindings[0].chat,null);assert.equal(panel.bindings[0].title,'Tarefa fictícia');

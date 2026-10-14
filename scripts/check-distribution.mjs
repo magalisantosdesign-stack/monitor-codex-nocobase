@@ -45,6 +45,8 @@ export async function checkDistribution(){
  }
  const panel=await readFile(join(distributionRoot,'src/panel.jsx'),'utf8');
  assert.ok(/demo:\s*true/.test(panel),'A distribuição deve iniciar em demonstração.');
+ const tasksPanel=await readFile(join(distributionRoot,'src/panel-tasks.jsx'),'utf8');
+ assert.ok(/demo:\s*true/.test(tasksPanel),'A página de tarefas deve iniciar em demonstração.');
  const usagePanel=await readFile(join(distributionRoot,'src/panel-usage.jsx'),'utf8');
  assert.ok(/demo:\s*true/.test(usagePanel),'A página de uso deve iniciar em demonstração.');
  return files;

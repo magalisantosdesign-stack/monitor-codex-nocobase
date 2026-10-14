@@ -1,0 +1,34 @@
+{
+  "collectionName": "codex_monitor_tasks",
+  "name": "status",
+  "title": "Situação da tarefa",
+  "interface": "select",
+  "defaultValue": "nao_iniciado",
+  "enum": [
+    {
+      "value": "nao_iniciado",
+      "label": "Não iniciado",
+      "color": "default"
+    },
+    {
+      "value": "em_andamento",
+      "label": "Em andamento",
+      "color": "blue"
+    },
+    {
+      "value": "aguardando",
+      "label": "Aguardando",
+      "color": "gold"
+    },
+    {
+      "value": "pausado",
+      "label": "Pausado",
+      "color": "orange"
+    },
+    {
+      "value": "concluido",
+      "label": "Concluído",
+      "color": "green"
+    }
+  ]
+}

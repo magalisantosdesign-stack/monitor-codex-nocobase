@@ -1,7 +1,7 @@
 # Cadastro de tarefas no Monitor Codex
 
 O pacote inclui um cadastro básico vazio. Depois de prepará-lo no NocoBase 2,
-o botão **Nova tarefa** permite cadastrar diretamente no Monitor Codex.
+a página **Tarefas** oferece um Kanban para cadastrar e editar. O botão **Cadastrar nova tarefa** do Monitor abre o mesmo cadastro pela lateral.
 Na instalação via Codex, o agente realiza essa preparação seguindo
 [INSTALAR-COM-CODEX.md](INSTALAR-COM-CODEX.md). Os passos abaixo são a alternativa manual.
 
@@ -13,17 +13,20 @@ No gerenciador de coleções do NocoBase, crie uma coleção do tipo **Geral**:
 - Título: **Tarefas do Monitor Codex**.
 - Chave primária: `id`, criada automaticamente pelo NocoBase.
 
-Adicione os campos de texto de linha única:
+Adicione os campos abaixo; use texto de linha única para `title`, `project` e `linkCodex`:
 
 | Nome técnico | Título | Obrigatório |
 | --- | --- | --- |
 | `title` | Nome da tarefa | Sim, até 200 caracteres |
 | `project` | Projeto | Não |
 | `linkCodex` | Link do chat Codex | Não |
+| `status` | Situação da tarefa (seleção única) | Não; padrão `nao_iniciado` |
+
+O campo `status` é uma seleção única: `nao_iniciado` (Não iniciado), `em_andamento` (Em andamento), `aguardando` (Aguardando), `pausado` (Pausado) e `concluido` (Concluído). Use as opções e cores do JSON incluído.
 
 O campo de link é texto para aceitar o esquema `codex://`. O formulário valida
 o ID antes de salvar. Não é necessário criar relação com outra coleção,
-situação de negócio, dados de demonstração ou outra página de cadastro.
+dados de demonstração ou página adicional de formulário.
 
 Para administradores com o CLI oficial autenticado no ambiente correto, a
 definição equivalente está em `config/nocobase-tasks.json`. Execute na raiz
@@ -41,25 +44,27 @@ nb api data-modeling collections get --filter-by-tk codex_monitor_tasks --append
 nb api data-modeling collections apply --body-file config/nocobase-tasks.json -j
 ```
 
-Confira no resultado a coleção geral, chave `id` e os três campos. Uma falha de
+Confira no resultado a coleção geral, chave `id` e os quatro campos. Uma falha de
 autenticação, conexão ou permissão não significa que a coleção não existe.
 Não use `--replace-fields`. Se já existir, confira a compatibilidade e reutilize;
 não aplique o arquivo inteiro sobre um cadastro preexistente nem sobrescreva
 campos. Uma incompatibilidade exige revisão antes de modificar o modelo.
 
-Mantenha as fontes básicas incluídas nos dois blocos, configure `demo: false`
+Crie as páginas **Tarefas → Monitor Codex → Uso do Codex**, nessa ordem. Use `src/panel-tasks.jsx`, `src/panel.jsx` e `src/panel-usage.jsx`, respectivamente. Mantenha a mesma coleção básica nos três blocos, configure `demo: false`
 e o endpoint correto. Para o papel que utilizará o painel, conceda leitura e
-criação nessa coleção e edição do campo `linkCodex`, além do acesso às páginas.
+criação e edição dos quatro campos nessa coleção, além do acesso às páginas.
 Não é necessária permissão de exclusão. A instalação não altera ACL global.
 
 ## Cadastrar e acompanhar
 
-1. Abra **Monitor Codex** e clique em **Nova tarefa**.
+1. Abra **Tarefas** e clique em **Cadastrar nova tarefa**, ou use o mesmo botão no Monitor.
 2. Preencha **Nome da tarefa** e, se quiser, **Projeto**.
 3. Informe o ID ou `codex://threads/ID` em **Link do chat**, ou deixe vazio.
 4. Clique em **Cadastrar tarefa**.
 
-Com link, o cadastro aparece no acompanhamento. Sem link, ele fica salvo no
+O cadastro sempre aparece no Kanban de Tarefas. Use **Editar tarefa** para rever nome, projeto, situação ou link. O seletor de situação do cartão move a tarefa entre as cinco colunas. Tarefa concluída mantém seu vínculo; a resposta do chat não conclui a tarefa automaticamente.
+
+Com link, o cadastro também aparece no acompanhamento. Sem link, ele fica salvo no
 NocoBase e disponível em **Escolha uma tarefa ou projeto**; selecione-o depois,
 informe o link e clique em **Vincular**. O nome do projeto é apenas um rótulo,
 não cria um projeto separado nem define a categoria Pessoal/Profissional do consumo.
@@ -71,6 +76,16 @@ ou o histórico de consumo já registrado.
 
 Na demonstração, abrir o formulário é permitido e **Cadastrar tarefa** fica
 desabilitado. Nenhum dado é gravado nem é feita uma conexão para demonstrá-lo.
+
+## Atualizar uma instalação 0.11
+
+Confira o esquema existente antes de escrever. Se `codex_monitor_tasks` já possui `status` compatível, reutilize sem modificar. Se faltar apenas esse campo, consulte `nb api data-modeling fields apply --help` e aplique somente:
+
+```powershell
+nb api data-modeling fields apply --body-file config/nocobase-task-status.json -j
+```
+
+Não reaplique a coleção inteira nem substitua campos. Registros antigos sem situação aparecem em Não iniciado sem regravação. Valores desconhecidos ficam em coluna própria para revisão. Inclua a página Tarefas e atualize o código do Monitor preservando endpoint, fontes e links.
 
 ## Aproveitar suas coleções existentes
 
@@ -86,7 +101,7 @@ sources: [
 
 Alinhe também `USAGE_CONFIG.sources` na página Uso do Codex. Nesse caminho,
 cadastre no formulário que já usa e depois selecione o registro no Monitor.
-Não é obrigatório criar `codex_monitor_tasks`.
+Não é obrigatório criar `codex_monitor_tasks` para monitorar fontes externas. A página Tarefas incluída usa o cadastro básico: para usá-la somente com uma coleção externa, adapte e teste `TASKS_CONFIG`, os campos obrigatórios e as opções `TASK_STATUSES` conforme seu modelo. Não aponte o formulário simples para outra coleção sem essa conferência.
 
 Para usar ambos, mantenha a configuração `taskCreation` básica e adicione
 suas coleções às fontes dos dois painéis. O botão **Nova tarefa** continuará
