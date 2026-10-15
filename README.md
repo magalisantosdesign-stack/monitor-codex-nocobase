@@ -1,5 +1,8 @@
 # Monitor Codex para NocoBase
 
+> [!NOTE]
+> **Versão independente disponível:** conheça o [Monitor Codex Local](https://github.com/magalisantosdesign-stack/monitor-codex-local), que funciona no navegador, com cadastro próprio de tarefas e sem depender de NocoBase, Docker ou extensão. Este repositório mantém a versão integrada ao NocoBase.
+
 Kanban local para acompanhar chats vinculados a tarefas ou projetos: **Processando**, **Aguardando aprovação**, **Aguardando resposta**, **Respondido**, **Interrompido**, **Sem sinal** e **Estado não confirmado**. Oferece Stand-by, atualização automática e suporte aos temas claro e escuro. O estado do chat é independente da situação da tarefa ou projeto.
 
 Inclui a página **Tarefas**, com Kanban para cadastrar, consultar e editar o trabalho, mesmo sem chat vinculado. O menu fica na ordem **Tarefas → Monitor Codex → Uso do Codex**. No Monitor, **Cadastrar nova tarefa** abre o cadastro pela lateral. Os dois lugares usam a mesma coleção, sem duplicar tarefas. Também pode integrar coleções que já utiliza no NocoBase.
